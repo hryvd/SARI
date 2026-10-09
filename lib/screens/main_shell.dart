@@ -6,6 +6,8 @@ import '../application/auth_provider.dart';
 import '../application/inventory_provider.dart';
 import '../application/listahan_provider.dart';
 import '../application/locale_provider.dart';
+import '../application/store_adapter_provider.dart';
+import '../domain/adapters/store_adapter.dart';
 import '../theme/app_theme.dart';
 import '../theme/store_theme.dart';
 import '../widgets/liquid_background.dart';
@@ -58,13 +60,15 @@ class _MainShellState extends ConsumerState<MainShell> {
         listAsync.value?.entries.where((e) => e.isOverdue).length ?? 0;
     final bool hasAlerts = (lowStock + overdue) > 0;
 
+    final StoreAdapter storeAdapter = ref.watch(storeAdapterProvider);
+
     // ── 3 Canonical Tabs per Role ──────────────────────────────────────────
-    // Seller: [0] AI Agent, [1] POS, [2] Data Summary
-    // Buyer:  [0] AI Agent, [1] Profile, [2] Inbox
+    // Seller: [0] AI Agent, [1] Store POS (Polymorphic), [2] Data Summary
+    // Buyer:  [0] AI Agent, [1] Profile, [2] Settings
     final List<Widget> tabs = isSeller
         ? <Widget>[
             const AiAgentScreen(),
-            const ScannerScreen(),
+            storeAdapter.buildPosInterface(context),
             AnalyticsScreen(
               onOpenTransactions: () {
                 Navigator.of(context).push(
@@ -77,8 +81,8 @@ class _MainShellState extends ConsumerState<MainShell> {
           ]
         : const <Widget>[
             AiAgentScreen(),
-            BuyerProfileScreen(),
-            BuyerInboxScreen(),
+            BuyerProfileScreen(embedded: true),
+            SettingsScreen(embedded: true),
           ];
 
     final int safeIndex = _index.clamp(0, tabs.length - 1);
@@ -143,6 +147,16 @@ class _MainShellState extends ConsumerState<MainShell> {
         actions: <Widget>[
           if (isSeller) ...<Widget>[
             _HeaderActionButton(
+              tooltip: 'Imbentaryo',
+              icon: Icons.inventory_2_outlined,
+              iconColor: storeAccent,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const InventoryScreen(),
+                ),
+              ),
+            ),
+            _HeaderActionButton(
               tooltip: 'Mga Abiso',
               icon: Icons.notifications_none_rounded,
               iconColor: brandAmber,
@@ -163,17 +177,29 @@ class _MainShellState extends ConsumerState<MainShell> {
                 ),
               ),
             ),
-          ],
-          _HeaderActionButton(
-            tooltip: 'Mga Setting',
-            icon: Icons.settings_outlined,
-            iconColor: c.textSecondary,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const SettingsScreen(),
+            _HeaderActionButton(
+              tooltip: 'Mga Setting',
+              icon: Icons.settings_outlined,
+              iconColor: c.textSecondary,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const SettingsScreen(),
+                ),
               ),
             ),
-          ),
+          ],
+          if (!isSeller) ...<Widget>[
+            _HeaderActionButton(
+              tooltip: 'Inbox ng Mamimili',
+              icon: Icons.inbox_outlined,
+              iconColor: brandGreen,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const BuyerInboxScreen(),
+                ),
+              ),
+            ),
+          ],
           // ── Top-Right Avatar ──────────────────────────────────────────
           GestureDetector(
             onTap: () => _showAvatarMenu(context, isSeller, activeStore),
@@ -259,13 +285,13 @@ class _MainShellState extends ConsumerState<MainShell> {
                   ),
                 ),
 
-                // Button 2: Data Summary (Seller) OR Inbox (Buyer)
+                // Button 2: Data Summary (Seller) OR Settings (Buyer)
                 Expanded(
                   child: _BottomNavButton(
-                    label: isSeller ? 'Data Summary' : 'Inbox',
+                    label: isSeller ? 'Data Summary' : 'Settings',
                     icon: isSeller
                         ? Icons.bar_chart_rounded
-                        : Icons.inbox_rounded,
+                        : Icons.settings_rounded,
                     isActive: safeIndex == 2,
                     activeColor: brandGreen,
                     onTap: () {

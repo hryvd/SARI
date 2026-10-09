@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../screens/scanner_screen.dart';
 import '../../theme/store_theme.dart';
 import '../../widgets/item_box.dart';
 import '../entities/product.dart';
@@ -145,11 +146,6 @@ class SariSariAdapter implements StoreAdapter {
 
   @override
   Widget buildPosInterface(BuildContext context) {
-    return Center(
-      child: Text(
-        'Sari-Sari Barcode Scanner POS',
-        style: TextStyle(color: brandColor),
-      ),
-    );
+    return const ScannerScreen();
   }
 }

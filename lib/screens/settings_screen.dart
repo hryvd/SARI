@@ -9,7 +9,8 @@ import '../theme/app_theme.dart';
 import '../theme/store_theme.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  final bool embedded;
+  const SettingsScreen({super.key, this.embedded = false});
 
   @override
   ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
@@ -57,17 +58,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     const Color brandGreen = Color(0xFF1E6E5A);
     const Color brandAmber = Color(0xFFC8861A);
 
-    return Scaffold(
-      backgroundColor: c.background,
-      appBar: AppBar(
-        title: const Text(
-          'Mga Setting · SARI',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        children: <Widget>[
+    final Widget content = ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      children: <Widget>[
           // ── 1. ACCOUNT GROUP ──────────────────────────────────────────
           _buildSectionHeader('Account at Pagkakakilanlan', Icons.person_outline),
           _buildCard(
@@ -628,7 +621,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           const SizedBox(height: 32),
         ],
+      );
+
+    if (widget.embedded) {
+      return content;
+    }
+
+    return Scaffold(
+      backgroundColor: c.background,
+      appBar: AppBar(
+        title: const Text(
+          'Mga Setting · SARI',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
       ),
+      body: content,
     );
   }
 
