@@ -1,0 +1,10 @@
+{
+  "description": "Offers an intuitive, lively UI/UX tailored for Flutter app development, enabling users of all ages to create efficient, user-friendly apps easily.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

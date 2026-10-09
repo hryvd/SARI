@@ -1,0 +1,13 @@
+<svg width="256" height="256" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="lr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e53935" /><stop offset="1" stop-color="#8e1616" /></linearGradient>
+        <linearGradient id="ly" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd75e" /><stop offset="1" stop-color="#f5a623" /></linearGradient>
+      </defs>
+      <rect width="120" height="120" rx="30" fill="url(#lr)" />
+      <rect x="12" y="14" width="96" height="40" rx="10" fill="url(#ly)" />
+      <text x="60" y="46" text-anchor="middle" font-family="Baloo 2, sans-serif" font-weight="800" font-size="34" fill="#a31a1a" letter-spacing="1">SARI</text>
+      <path d="M8 66 Q8 58 16 58 H104 Q112 58 112 66 L108 80 Q100 88 90 80 Q80 88 70 80 Q60 88 50 80 Q40 88 30 80 Q20 88 12 80 Z" fill="#fff" />
+      <path d="M30 80 Q40 88 50 80 M70 80 Q80 88 90 80" stroke="#f3c9c5" stroke-width="2" fill="none" />
+      <rect x="26" y="90" width="68" height="22" rx="6" fill="#fff" opacity=".92" />
+      <rect x="52" y="94" width="16" height="18" rx="3" fill="#c62828" />
+    </svg>
