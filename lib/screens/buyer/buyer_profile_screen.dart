@@ -273,24 +273,24 @@ class BuyerProfileScreen extends ConsumerWidget {
             // Open active order QR code dialog
             final BuyerOrder sampleOrder = BuyerOrder(
               orderId: 'ORD-8821',
-              buyerName: auth.user?.storeName.isNotEmpty == true
-                  ? auth.user!.storeName
-                  : 'Harry V. Dimaano',
+              storeId: 'store-1',
+              timestamp: DateTime.now(),
               items: const <BuyerOrderItem>[
                 BuyerOrderItem(
+                  id: 'item-1',
                   name: 'Lucky Me Pancit Canton',
-                  quantity: 3,
+                  qty: 3,
                   unitPrice: 15.0,
                 ),
                 BuyerOrderItem(
+                  id: 'item-2',
                   name: 'Coke Sakto 200ml',
-                  quantity: 2,
+                  qty: 2,
                   unitPrice: 12.0,
                 ),
               ],
               totalAmount: 69.0,
-              status: BuyerOrderStatus.pending,
-              createdAt: DateTime.now(),
+              notes: 'Handa para sa checkout',
             );
             BuyerQrDialog.show(context, sampleOrder);
           },
