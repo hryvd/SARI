@@ -53,6 +53,9 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
 
     final List<String> chips = isSeller
         ? <String>[
+            '🔮 Hulaan ang benta bukas',
+            '📅 7-Araw na Sales Forecast',
+            '⚡ Kailan ang susunod na Peak Day?',
             'Anong kulang sa tindahan?',
             'Mag-restock ng Lucky Me, good for 3 days',
             'Ilan ang naibenta ko kahapon?',
@@ -131,6 +134,57 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
     );
   }
 
+  void _showModelInfoDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext ctx) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: <Widget>[
+              Icon(Icons.psychology, color: Color(0xFF1E6E5A), size: 24),
+              SizedBox(width: 8),
+              Text(
+                'Sar-E AI Model Info',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ],
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Text(
+                'Trained On-Device Sales Predictor',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: Color(0xFF1E6E5A),
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                '• Model: 30-Tree Gradient Boosting Regressor (GBR)\n'
+                '• Dataset: 15,446 Sari-Sari Transactions (sari_sari_dataset.csv)\n'
+                '• Target: Daily Sales Revenue (₱ PHP)\n'
+                '• Features: 11 temporal & lagged features (Payday 15th/30th, Weekends, Holidays, Rolling 7-Day Revenue)\n'
+                '• Latency: < 2ms pure Dart on-device execution\n'
+                '• Offline: 100% local — walang data o internet na kailangan',
+                style: TextStyle(fontSize: 12, height: 1.4),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Isara', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildModelStatusBanner(BuildContext context, AgentState state) {
     const Color brandGreen = Color(0xFF1E6E5A);
     const Color brandAmber = Color(0xFFC8861A);
@@ -149,10 +203,10 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
           children: <Widget>[
             Row(
               children: <Widget>[
-                const Icon(Icons.downloading, color: brandAmber, size: 20),
+                const Icon(Icons.sync, color: brandAmber, size: 20),
                 const SizedBox(width: 8),
                 const Text(
-                  'Nag-da-download ng Gemma 4 E2B model...',
+                  'Sini-sync ang Sar-E GBR Sales Model (30 Trees)...',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: brandAmber,
@@ -181,30 +235,50 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
       );
     }
 
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-      decoration: BoxDecoration(
-        color: brandGreen.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: brandGreen.withValues(alpha: 0.2)),
-      ),
-      child: const Row(
-        children: <Widget>[
-          Icon(Icons.bolt, color: brandGreen, size: 18),
-          SizedBox(width: 6),
-          Expanded(
-            child: Text(
-              'Gemma 4 E2B + FunctionGemma · 100% On-Device Offline AI',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: brandGreen,
+    return InkWell(
+      onTap: () => _showModelInfoDialog(context),
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: brandGreen.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: brandGreen.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          children: <Widget>[
+            const Icon(Icons.auto_graph, color: brandGreen, size: 18),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                'Sar-E AI Engine: GBR v1.0.0 (30 Trees) · 100% Offline Active',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: brandGreen,
+                ),
               ),
             ),
-          ),
-          Icon(Icons.shield_outlined, color: brandGreen, size: 16),
-        ],
+            const SizedBox(width: 4),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: brandGreen,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text(
+                'ACTIVE',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

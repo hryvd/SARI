@@ -66,6 +66,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/sare_logo.png
+    - assets/sales_model.json
 
 flutter_launcher_icons:
   android: true
