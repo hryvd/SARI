@@ -134,3 +134,35 @@ The application builds into a production-ready Android package:
 - **Release Mirror**: `apk/app-release.apk`
 - **Target OS**: Android 5.0 (API level 21) and above.
 - **Network Requirement**: 0 kbps (100% offline operational requirement).
+
+---
+
+## 8. Technical Specifications & Attributions
+
+### AI Models
+SARI uses Google DeepMind Gemma 4 edge models (E2B/E4B) running fully on the device for Taglish voice and text understanding. When a phone cannot run Gemma, a rule-based slot-extraction engine written for SARI takes over. Sales forecasting uses a 30-tree Gradient Boosting Regressor trained on 15,446 Philippine neighborhood retail transactions sourced from real-world collected transaction logs (`sari_sari_dataset.csv`), capturing authentic daily sales volumes, peak-hour surges, and payday (*Kinsenas*) cycles across community sari-sari stores. No cloud AI services or external AI APIs are called at runtime.
+
+### Frameworks and Libraries
+- **Core Platform**: Flutter 3.x and Dart with sound null safety.
+- **State Management**: `flutter_riverpod: ^2.6.1` (MIT License).
+- **On-Device Database**: SQLite through `sqflite: ^2.4.2` and `sqflite_common_ffi: ^2.4.0+3` (BSD-2-Clause License).
+- **Barcode & QR Scanning**: `mobile_scanner: ^7.2.0` (BSD-3-Clause License) and `qr_flutter: ^4.1.0` / `qr: ^3.0.2` (BSD-3-Clause License).
+- **Speech-to-Text & PTT**: Native Android Speech Recognition platform channel integration with on-device audio waveform visualizer.
+- **Bluetooth Thermal Printing & Label PDF Generation**: `printing: ^5.14.2` (Apache-2.0 License) and `pdf: ^3.11.3` (Apache-2.0 License).
+- **Local Storage & File Handling**: `path_provider: ^2.1.5` (BSD-3-Clause License) and `open_file: ^3.5.10` (BSD-3-Clause License).
+- **Biometrics & Hardware Security**: `local_auth: ^3.0.1` (BSD-3-Clause License) and `crypto: ^3.0.6` (BSD-3-Clause License).
+- **Icon Set & Typography**: Google Material Icons (`MaterialIcons-Regular.otf`, Apache-2.0 License) and Google Fonts (`google_fonts: ^6.2.1`, SIL Open Font License 1.1).
+- **Charts & Data Visualization**: `fl_chart: ^1.2.0` (MIT License).
+
+### APIs
+None required at runtime. The app works with no internet connection. Payment options (GCash, Maya, and bank QR transfers including BDO, BPI, GoTyme, UnionBank, MariBank) display the merchant's stored QR codes locally and do not connect to any external payment gateway or payment provider. No payment API, SMS API, or Messenger API is called at runtime; order receipts, wholesale restock lists, and suki utang reminders are shared strictly through the mobile operating system's native share sheet (`Share` / `ClipboardData`).
+
+### AI Development Tools
+Claude (Anthropic) was used to plan the architectural implementation, structure the domain models, and author the master project specification documents. Antigravity / Gemini (Google DeepMind) was used as the pair-programming and coding agent to write the Flutter application code, develop the SQLite schema and DAOs, build the StoreAdapter polymorphic architecture, implement the NLU slot-extraction engine and nightly reorder worker, assemble the 125-test automated test harness, and compile the production Android release APK.
+
+### Existing Code and Assets
+- **Gemma 4 Edge Weights**: Google DeepMind Gemma 4 model weights utilized under the official Gemma Terms of Use.
+- **Third-Party Libraries**: Open-source Flutter and Dart packages sourced from pub.dev under permissive licenses (MIT, BSD-2-Clause, BSD-3-Clause, Apache-2.0).
+- **Reused Code & Assets**: Prior Sar-E foundations (database migration schema versions 1–3 and base entity structures), brand assets (`assets/images/sare_logo.png`), and pre-trained GBR decision tree weights (`assets/sales_model.json`).
+- **Newly Authored for This Project**: The 125-test verification harness (`test/harness/`), the polymorphic `StoreAdapter` system (Sari-Sari, Gulay, Rice, Carinderia), the `ReorderEngine` and `NightlyReorderWorker`, the cent-exact `ScaleCalculator`, the `ComboEngine`, the `PortionAdvisor`, and the embedded rule-based Taglish NLU engine.
+
