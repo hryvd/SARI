@@ -53,7 +53,7 @@ class SalesPredictionService {
   List<dynamic> _trees = <dynamic>[];
 
   bool get isModelLoaded => _isLoaded;
-  String get modelName => _modelJson?['model_name'] as String? ?? 'Sar-E GBR AI Engine';
+  String get modelName => _modelJson?['model_name'] as String? ?? 'SARI GBR AI Engine';
   String get algorithm => _modelJson?['algorithm'] as String? ?? 'Gradient Boosting Regressor';
   String get version => _modelJson?['version'] as String? ?? '1.0.0';
 

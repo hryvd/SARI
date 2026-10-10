@@ -24,7 +24,7 @@ class CredibilityBadgeSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final AppColors c = appColors(context);
-    final String storeName = profile?.storeName ?? 'Sar-E Store';
+    final String storeName = profile?.storeName ?? 'SARI Store';
     final String ownerName = profile?.ownerName ?? 'Tindero / Tindera';
     final String storeType = profile?.storeType ?? 'sari_sari';
 

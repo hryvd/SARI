@@ -128,6 +128,7 @@ void main() {
               products: sampleProducts,
               onTapProduct: (_) {},
               onAddProduct: ({
+                String? alias,
                 required String barcode,
                 required double costPrice,
                 required String name,

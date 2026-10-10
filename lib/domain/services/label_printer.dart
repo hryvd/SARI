@@ -46,7 +46,7 @@ class LabelPrinter {
   static Future<List<int>> generateSheet(List<BinLabelData> labels) async {
     final pw.Document doc = pw.Document(
       title: 'Bigasan Bin QR Labels',
-      author: 'Sar-E POS',
+      author: 'SARI POS',
     );
 
     // Split labels into pages

@@ -668,7 +668,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   title: const Text('Payment QR Codes',
                       style: TextStyle(fontWeight: FontWeight.w600)),
                   subtitle: const Text(
-                      'Upload your GCash/Maya/bank QR — Sar-E auto-regenerates it in brand colors.',
+                      'Upload your GCash/Maya/bank QR — SARI auto-regenerates it in brand colors.',
                       style: TextStyle(fontSize: 12)),
                   trailing: IconButton(
                     onPressed: _addQrSlot,

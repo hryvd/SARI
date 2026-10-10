@@ -32,7 +32,10 @@ class InventoryState {
     }
     if (searchQuery.isNotEmpty) {
       final String q = searchQuery.toLowerCase();
-      list = list.where((Product p) => p.name.toLowerCase().contains(q));
+      list = list.where((Product p) =>
+          p.name.toLowerCase().contains(q) ||
+          (p.barcode != null && p.barcode!.toLowerCase().contains(q)) ||
+          (p.alias != null && p.alias!.toLowerCase().contains(q)));
     }
     return list.toList();
   }
@@ -94,6 +97,7 @@ class InventoryNotifier extends AsyncNotifier<InventoryState> {
 
   Future<void> addProduct({
     required String name,
+    String? alias,
     String? barcode,
     required double unitPrice,
     required double costPrice,
@@ -106,6 +110,7 @@ class InventoryNotifier extends AsyncNotifier<InventoryState> {
       categoryId: categoryId,
       barcode: barcode,
       name: name,
+      alias: alias,
       unitPrice: unitPrice,
       costPrice: costPrice,
       stockQty: stockQty,

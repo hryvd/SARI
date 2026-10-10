@@ -88,9 +88,9 @@ class _QrLabelPreviewScreenState
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Icon(Icons.qr_code_2, size: 64, color: _brand.withOpacity(0.4)),
+            Icon(Icons.qr_code_2, size: 64, color: _brand.withValues(alpha: 0.4)),
             const SizedBox(height: 12),
-            Text(
+            const Text(
               'No rice varieties yet.\nAdd items in Inventory first.',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white54, fontSize: 15),
@@ -204,7 +204,7 @@ class _LabelCard extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: isSelected
-            ? _brand.withOpacity(0.12)
+            ? _brand.withValues(alpha: 0.12)
             : const Color(0xFF1A1F25),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
@@ -289,9 +289,9 @@ class _PriceChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Text(
         label,

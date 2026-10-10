@@ -19,8 +19,6 @@ import 'buyer/buyer_profile_screen.dart';
 import 'inventory_screen.dart';
 import 'ledger/kasaysayan_screen.dart';
 import 'notifications_screen.dart';
-import 'profile_screen.dart';
-import 'scanner_screen.dart';
 import 'settings_screen.dart';
 import 'transactions_screen.dart';
 
@@ -32,7 +30,7 @@ class MainShell extends ConsumerStatefulWidget {
 }
 
 class _MainShellState extends ConsumerState<MainShell> {
-  int _index = 1; // Default to POS for sellers, Profile for buyers
+  int? _index;
 
   void _logout() {
     Navigator.of(context).popUntil((Route<dynamic> route) => route.isFirst);
@@ -47,9 +45,6 @@ class _MainShellState extends ConsumerState<MainShell> {
     final AppLocale locale = ref.watch(localeProvider);
 
     final StoreType activeStore = auth.storeType;
-    final Color storeAccent = StoreColors.forType(activeStore);
-    const Color brandGreen = Color(0xFF1E6E5A);
-    const Color brandAmber = Color(0xFFC8861A);
 
     // Calculate total alerts
     final invAsync = ref.watch(inventoryProvider);
@@ -62,9 +57,15 @@ class _MainShellState extends ConsumerState<MainShell> {
 
     final StoreAdapter storeAdapter = ref.watch(storeAdapterProvider);
 
+    final String storeName = auth.user?.storeName.isNotEmpty == true
+        ? auth.user!.storeName
+        : (auth.storeNameHint ?? (isSeller ? 'Tindahan' : 'Mamimili'));
+    final String initialLetter =
+        storeName.isNotEmpty ? storeName[0].toUpperCase() : 'S';
+
     // ── 3 Canonical Tabs per Role ──────────────────────────────────────────
-    // Seller: [0] AI Agent, [1] Store POS (Polymorphic), [2] Data Summary
-    // Buyer:  [0] AI Agent, [1] Profile, [2] Settings
+    // Seller: [0] AI Agent / Assistant, [1] Tindahan POS, [2] Buod / Summary
+    // Buyer:  [0] AI Agent / Assistant, [1] Tindahan Shopping, [2] Orders & Profile
     final List<Widget> tabs = isSeller
         ? <Widget>[
             const AiAgentScreen(),
@@ -79,64 +80,67 @@ class _MainShellState extends ConsumerState<MainShell> {
               },
             ),
           ]
-        : const <Widget>[
-            AiAgentScreen(),
-            BuyerProfileScreen(embedded: true),
-            SettingsScreen(embedded: true),
+        : <Widget>[
+            const AiAgentScreen(),
+            const BuyerKioskScreen(embedded: true),
+            const BuyerProfileScreen(embedded: true),
           ];
 
-    final int safeIndex = _index.clamp(0, tabs.length - 1);
+    final int safeIndex =
+        (_index ?? (isSeller ? 1 : 2)).clamp(0, tabs.length - 1);
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: c.primaryDark,
+        elevation: 0,
+        titleSpacing: 12,
         title: Row(
-          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            // "S" Brand Squircle Avatar (Matches Image 1)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: brandGreen,
-                borderRadius: BorderRadius.circular(10),
+              width: 36,
+              height: 36,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
               ),
-              child: const Text(
-                'SARI',
+              alignment: Alignment.center,
+              child: Text(
+                initialLetter,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: c.primaryDark,
                   fontWeight: FontWeight.w900,
-                  fontSize: 16,
-                  letterSpacing: 1.1,
+                  fontSize: 18,
                 ),
               ),
             ),
-            const SizedBox(width: 8),
-            // Store badge (seller) or Mamimili badge (buyer)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: isSeller
-                    ? storeAccent.withValues(alpha: 0.15)
-                    : brandGreen.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isSeller
-                      ? storeAccent.withValues(alpha: 0.4)
-                      : brandGreen.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Row(
+            const SizedBox(width: 10),
+            // Store Title & Subtitle in White
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   Text(
-                    isSeller ? activeStore.emoji : '🛒',
-                    style: const TextStyle(fontSize: 12),
+                    storeName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.2,
+                    ),
                   ),
-                  const SizedBox(width: 4),
                   Text(
-                    isSeller ? activeStore.displayName : 'Mamimili',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: isSeller ? storeAccent : brandGreen,
+                    isSeller
+                        ? 'TINDERA / TINDERO • ${activeStore.displayName.toUpperCase()}'
+                        : 'MAMIMILI • SARI BUYER',
+                    style: const TextStyle(
+                      color: Color(0xFFFDE8E8),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.6,
                     ),
                   ),
                 ],
@@ -147,9 +151,9 @@ class _MainShellState extends ConsumerState<MainShell> {
         actions: <Widget>[
           if (isSeller) ...<Widget>[
             _HeaderActionButton(
-              tooltip: 'Imbentaryo',
+              tooltip: t(locale, 'inventory'),
               icon: Icons.inventory_2_outlined,
-              iconColor: storeAccent,
+              iconColor: Colors.white,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const InventoryScreen(),
@@ -157,33 +161,13 @@ class _MainShellState extends ConsumerState<MainShell> {
               ),
             ),
             _HeaderActionButton(
-              tooltip: 'Mga Abiso',
+              tooltip: t(locale, 'notifications'),
               icon: Icons.notifications_none_rounded,
-              iconColor: brandAmber,
+              iconColor: Colors.white,
               showDot: hasAlerts,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const NotificationsScreen(),
-                ),
-              ),
-            ),
-            _HeaderActionButton(
-              tooltip: 'Kiosk ng Mamimili',
-              icon: Icons.shopping_basket_outlined,
-              iconColor: storeAccent,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const BuyerKioskScreen(),
-                ),
-              ),
-            ),
-            _HeaderActionButton(
-              tooltip: 'Mga Setting',
-              icon: Icons.settings_outlined,
-              iconColor: c.textSecondary,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const SettingsScreen(),
                 ),
               ),
             ),
@@ -192,37 +176,42 @@ class _MainShellState extends ConsumerState<MainShell> {
             _HeaderActionButton(
               tooltip: 'Inbox ng Mamimili',
               icon: Icons.inbox_outlined,
-              iconColor: brandGreen,
+              iconColor: Colors.white,
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
                   builder: (_) => const BuyerInboxScreen(),
                 ),
               ),
             ),
+            _HeaderActionButton(
+              tooltip: t(locale, 'notifications'),
+              icon: Icons.notifications_none_rounded,
+              iconColor: Colors.white,
+              showDot: hasAlerts,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const NotificationsScreen(),
+                ),
+              ),
+            ),
           ],
-          // ── Top-Right Avatar ──────────────────────────────────────────
+          // ── Top-Right User Avatar (Image 1 inspired) ────────────────────
           GestureDetector(
-            onTap: () => _showAvatarMenu(context, isSeller, activeStore),
+            onTap: () =>
+                _showAvatarMenu(context, isSeller, activeStore, storeName),
             child: Container(
-              width: 38,
-              height: 38,
-              margin: const EdgeInsets.only(right: 12, left: 2),
+              width: 36,
+              height: 36,
+              margin: const EdgeInsets.only(right: 14, left: 4),
               decoration: BoxDecoration(
-                color: brandGreen,
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 2),
-                boxShadow: <BoxShadow>[
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
               ),
               alignment: Alignment.center,
-              child: Text(
-                isSeller ? '🏪' : '👤',
-                style: const TextStyle(fontSize: 18),
+              child: const Icon(
+                Icons.person_outline_rounded,
+                color: Colors.white,
+                size: 20,
               ),
             ),
           ),
@@ -261,39 +250,39 @@ class _MainShellState extends ConsumerState<MainShell> {
             height: 64,
             child: Row(
               children: <Widget>[
-                // Button 0: AI Agent (Both Seller & Buyer)
+                // Button 0: AI Agent / Assistant
                 Expanded(
                   child: _BottomNavButton(
-                    label: 'AI Agent',
+                    label: 'Assistant',
                     icon: Icons.auto_awesome_rounded,
                     isActive: safeIndex == 0,
-                    activeColor: brandGreen,
+                    activeColor: c.primary,
                     onTap: () => setState(() => _index = 0),
                   ),
                 ),
 
-                // Button 1: POS (Seller) OR Profile (Buyer)
+                // Button 1: Tindahan (Seller POS OR Buyer Shopping)
                 Expanded(
                   child: _BottomNavButton(
-                    label: isSeller ? 'POS' : 'Profile',
+                    label: 'Tindahan',
                     icon: isSeller
                         ? Icons.point_of_sale_rounded
-                        : Icons.person_rounded,
+                        : Icons.shopping_bag_outlined,
                     isActive: safeIndex == 1,
-                    activeColor: brandGreen,
+                    activeColor: c.primary,
                     onTap: () => setState(() => _index = 1),
                   ),
                 ),
 
-                // Button 2: Data Summary (Seller) OR Settings (Buyer)
+                // Button 2: Buod (Seller) OR Profile & Orders (Buyer)
                 Expanded(
                   child: _BottomNavButton(
-                    label: isSeller ? 'Data Summary' : 'Settings',
+                    label: isSeller ? 'Buod' : 'Profile',
                     icon: isSeller
                         ? Icons.bar_chart_rounded
-                        : Icons.settings_rounded,
+                        : Icons.person_rounded,
                     isActive: safeIndex == 2,
-                    activeColor: brandGreen,
+                    activeColor: c.primary,
                     onTap: () {
                       setState(() => _index = 2);
                       if (isSeller) {
@@ -310,10 +299,11 @@ class _MainShellState extends ConsumerState<MainShell> {
     );
   }
 
-  void _showAvatarMenu(
-      BuildContext context, bool isSeller, StoreType activeStore) {
-    const Color brandGreen = Color(0xFF1E6E5A);
-    const Color brandAmber = Color(0xFFC8861A);
+  void _showAvatarMenu(BuildContext context, bool isSeller,
+      StoreType activeStore, String currentStoreName) {
+    final AppLocale locale = ref.read(localeProvider);
+    final Color primaryRed = appColors(context).primary;
+    const Color accentGold = Color(0xFFB45309);
 
     showModalBottomSheet<void>(
       context: context,
@@ -332,10 +322,13 @@ class _MainShellState extends ConsumerState<MainShell> {
                   children: <Widget>[
                     CircleAvatar(
                       radius: 26,
-                      backgroundColor: brandGreen.withValues(alpha: 0.15),
-                      child: Text(
-                        isSeller ? activeStore.emoji : '👤',
-                        style: const TextStyle(fontSize: 24),
+                      backgroundColor: primaryRed.withValues(alpha: 0.15),
+                      child: Icon(
+                        isSeller
+                            ? Icons.storefront_rounded
+                            : Icons.person_rounded,
+                        color: primaryRed,
+                        size: 26,
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -344,18 +337,16 @@ class _MainShellState extends ConsumerState<MainShell> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            isSeller
-                                ? 'Tindahan ni Aling Rosa'
-                                : 'Harry V. Dimaano',
+                            currentStoreName,
                             style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           Text(
                             isSeller
-                                ? '${activeStore.displayName} · Batangas City'
-                                : 'Mamimili (Buyer) · Kumintang Ilaya',
+                                ? '${activeStore.displayName} · Tindahan'
+                                : (locale == AppLocale.en
+                                    ? 'Customer (Buyer)'
+                                    : 'Mamimili (Buyer)'),
                             style: const TextStyle(
                               fontSize: 12,
                               color: Colors.black54,
@@ -367,15 +358,16 @@ class _MainShellState extends ConsumerState<MainShell> {
                   ],
                 ),
                 const Divider(height: 24),
-
                 if (isSeller) ...<Widget>[
                   ListTile(
                     dense: true,
-                    leading: const Icon(Icons.inventory_2_outlined,
-                        color: brandGreen),
-                    title: const Text('Imbentaryo (Inventory)',
-                        style: TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: const Text('Pamamahala ng mga paninda at stock'),
+                    leading:
+                        Icon(Icons.inventory_2_outlined, color: primaryRed),
+                    title: Text(t(locale, 'inventory'),
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text(locale == AppLocale.en
+                        ? 'Manage items and inventory stock'
+                        : 'Pamamahala ng mga paninda at stock'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -388,12 +380,12 @@ class _MainShellState extends ConsumerState<MainShell> {
                   ),
                   ListTile(
                     dense: true,
-                    leading: const Icon(Icons.menu_book_outlined,
-                        color: brandGreen),
-                    title: const Text('Kasaysayan (Ledger at Utang)',
-                        style: TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle:
-                        const Text('Pinag-isang talaan ng benta, utang at bayad'),
+                    leading: Icon(Icons.menu_book_outlined, color: primaryRed),
+                    title: Text(t(locale, 'kasaysayan_title'),
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text(locale == AppLocale.en
+                        ? 'Sales, credit, and repayments ledger'
+                        : 'Pinag-isang talaan ng benta, utang at bayad'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -406,11 +398,15 @@ class _MainShellState extends ConsumerState<MainShell> {
                   ),
                   ListTile(
                     dense: true,
-                    leading:
-                        const Icon(Icons.swap_horiz, color: brandAmber),
-                    title: const Text('Palitan ang Uri ng Tindahan',
-                        style: TextStyle(fontWeight: FontWeight.w600)),
-                    subtitle: Text('Kasalukuyan: ${activeStore.displayName}'),
+                    leading: const Icon(Icons.swap_horiz, color: accentGold),
+                    title: Text(
+                        locale == AppLocale.en
+                            ? 'Switch Store Type'
+                            : 'Palitan ang Uri ng Tindahan',
+                        style: const TextStyle(fontWeight: FontWeight.w600)),
+                    subtitle: Text(locale == AppLocale.en
+                        ? 'Current: ${activeStore.displayName}'
+                        : 'Kasalukuyan: ${activeStore.displayName}'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () {
                       Navigator.pop(ctx);
@@ -418,13 +414,11 @@ class _MainShellState extends ConsumerState<MainShell> {
                     },
                   ),
                 ],
-
                 ListTile(
                   dense: true,
-                  leading:
-                      const Icon(Icons.settings_outlined, color: brandGreen),
-                  title: const Text('Mga Setting',
-                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  leading: Icon(Icons.settings_outlined, color: primaryRed),
+                  title: Text(t(locale, 'settings'),
+                      style: const TextStyle(fontWeight: FontWeight.w600)),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () {
                     Navigator.pop(ctx);
@@ -438,8 +432,8 @@ class _MainShellState extends ConsumerState<MainShell> {
                 ListTile(
                   dense: true,
                   leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const Text('Mag-logout',
-                      style: TextStyle(
+                  title: Text(t(locale, 'logout'),
+                      style: const TextStyle(
                           color: Colors.red, fontWeight: FontWeight.bold)),
                   onTap: () {
                     Navigator.pop(ctx);
@@ -455,6 +449,7 @@ class _MainShellState extends ConsumerState<MainShell> {
   }
 
   void _showStoreTypeDialog(BuildContext context) {
+    const Color primaryRed = Color(0xFFD62828);
     showModalBottomSheet<void>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -474,7 +469,8 @@ class _MainShellState extends ConsumerState<MainShell> {
               const SizedBox(height: 12),
               for (final StoreType t in StoreType.values)
                 ListTile(
-                  leading: Text(t.emoji, style: const TextStyle(fontSize: 24)),
+                  leading: const Icon(Icons.store_mall_directory_rounded,
+                      color: primaryRed),
                   title: Text(t.displayName,
                       style: const TextStyle(fontWeight: FontWeight.bold)),
                   onTap: () {
@@ -524,7 +520,8 @@ class _BottomNavButton extends StatelessWidget {
               Icon(
                 icon,
                 size: 22,
-                color: isActive ? Colors.white : Colors.black54,
+                color:
+                    isActive ? Colors.white : appColors(context).textSecondary,
               ),
               const SizedBox(height: 2),
               Text(
@@ -532,7 +529,9 @@ class _BottomNavButton extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
-                  color: isActive ? Colors.white : Colors.black54,
+                  color: isActive
+                      ? Colors.white
+                      : appColors(context).textSecondary,
                 ),
               ),
             ],
@@ -572,7 +571,7 @@ class _HeaderActionButton extends StatelessWidget {
               onPressed: onTap,
               icon: Icon(icon, size: 18, color: iconColor),
               style: IconButton.styleFrom(
-                backgroundColor: c.surfaceMuted,
+                backgroundColor: Colors.white.withValues(alpha: 0.16),
                 foregroundColor: iconColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),

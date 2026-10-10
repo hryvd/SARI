@@ -19,7 +19,7 @@ class BuyerOrderService {
     return withPrefix ? '$orderPrefix$jsonStr' : jsonStr;
   }
 
-  /// Checks whether [raw] payload is formatted as a Sar-E buyer order QR string.
+  /// Checks whether [raw] payload is formatted as a SARI buyer order QR string.
   static bool isBuyerOrder(String raw) {
     final String trimmed = raw.trim();
     if (trimmed.startsWith(orderPrefix)) return true;

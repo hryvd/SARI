@@ -9,7 +9,9 @@ import 'widgets/buyer_cart_sheet.dart';
 import 'widgets/credibility_badge_sheet.dart';
 
 class BuyerKioskScreen extends ConsumerStatefulWidget {
-  const BuyerKioskScreen({super.key});
+  const BuyerKioskScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
   ConsumerState<BuyerKioskScreen> createState() => _BuyerKioskScreenState();
@@ -31,7 +33,7 @@ class _BuyerKioskScreenState extends ConsumerState<BuyerKioskScreen> {
     final BuyerNotifier notifier = ref.read(buyerProvider.notifier);
     final StoreProfile? profile = state.storeProfile;
 
-    final String storeName = profile?.storeName ?? 'Sar-E Tindahan';
+    final String storeName = profile?.storeName ?? 'SARI Tindahan';
     final List<Product> items = state.filteredCatalog;
 
     // Distinct categories
@@ -53,90 +55,94 @@ class _BuyerKioskScreenState extends ConsumerState<BuyerKioskScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   const SizedBox(height: 12),
-                  // Top bar with exit and store branding
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Row(
-                        children: <Widget>[
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: c.primary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(10),
+                  // The app shell owns store branding when this screen is embedded.
+                  if (!widget.embedded)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Row(
+                          children: <Widget>[
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: c.primary.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.storefront,
+                                  color: c.primary, size: 22),
                             ),
-                            child: Icon(Icons.storefront, color: c.primary, size: 22),
-                          ),
-                          const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                storeName,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w800,
-                                  color: c.text,
+                            const SizedBox(width: 10),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Text(
+                                  storeName,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: c.text,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                'Kiosk ng Mamimili (Self-Serve)',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: c.textSecondary,
+                                Text(
+                                  'Kiosk ng Mamimili (Self-Serve)',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: c.textSecondary,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        icon: Icon(Icons.exit_to_app, color: c.textSecondary),
-                        tooltip: 'Bumalik sa Cashier',
-                      ),
-                    ],
-                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          icon: Icon(Icons.exit_to_app, color: c.textSecondary),
+                          tooltip: 'Bumalik sa Cashier',
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: 12),
-                  // Trust & Credibility Badge Banner
-                  InkWell(
-                    onTap: () => CredibilityBadgeSheet.show(context, profile),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: c.accent.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: c.accent.withValues(alpha: 0.3),
+                  if (!widget.embedded) const SizedBox(height: 12),
+                  // Trust details are only shown in the standalone kiosk route.
+                  if (!widget.embedded)
+                    InkWell(
+                      onTap: () => CredibilityBadgeSheet.show(context, profile),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: c.accent.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: c.accent.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: <Widget>[
+                            Icon(Icons.verified, color: c.accent, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Dokumento ay Nakakabit sa Telepono',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                  color: c.accent,
+                                ),
+                              ),
+                            ),
+                            Icon(
+                              Icons.chevron_right,
+                              size: 18,
+                              color: c.accent,
+                            ),
+                          ],
                         ),
                       ),
-                      child: Row(
-                        children: <Widget>[
-                          Icon(Icons.verified, color: c.accent, size: 18),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Dokumento ay Nakakabit sa Telepono',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                                color: c.accent,
-                              ),
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            size: 18,
-                            color: c.accent,
-                          ),
-                        ],
-                      ),
                     ),
-                  ),
                   const SizedBox(height: 12),
                   // Search Bar
                   Container(
@@ -171,7 +177,8 @@ class _BuyerKioskScreenState extends ConsumerState<BuyerKioskScreen> {
                               )
                             : null,
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 10),
                       ),
                     ),
                   ),
@@ -202,8 +209,7 @@ class _BuyerKioskScreenState extends ConsumerState<BuyerKioskScreen> {
                             );
                           }
                           final String cat = categories[index - 1];
-                          final bool isSelected =
-                              state.selectedCategory == cat;
+                          final bool isSelected = state.selectedCategory == cat;
                           return ChoiceChip(
                             label: Text(cat),
                             selected: isSelected,
@@ -362,9 +368,7 @@ class _BuyerKioskScreenState extends ConsumerState<BuyerKioskScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: isOutOfStock
-            ? c.surface.withValues(alpha: 0.5)
-            : c.surface,
+        color: isOutOfStock ? c.surface.withValues(alpha: 0.5) : c.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isOutOfStock
@@ -391,7 +395,8 @@ class _BuyerKioskScreenState extends ConsumerState<BuyerKioskScreen> {
               width: double.infinity,
               decoration: BoxDecoration(
                 color: c.surfaceMuted,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(15)),
               ),
               child: Stack(
                 children: <Widget>[
@@ -501,7 +506,8 @@ class _BuyerKioskScreenState extends ConsumerState<BuyerKioskScreen> {
                               notifier.addToCart(p);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('Naidagdag sa basket: ${p.name}'),
+                                  content:
+                                      Text('Naidagdag sa basket: ${p.name}'),
                                   duration: const Duration(milliseconds: 900),
                                   behavior: SnackBarBehavior.floating,
                                 ),

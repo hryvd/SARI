@@ -13,6 +13,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/store_theme.dart';
 
 /// Universal inventory item card with status glow.
@@ -55,12 +56,15 @@ class ItemBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppColors c = appColors(context);
     final BoxDecoration decoration = GlowTokens.cardDecoration(
       isLowStock: isLowStock,
       isOutOfStock: isOutOfStock,
+      surfaceColor: c.surface,
+      borderColor: c.borderSubtle,
     );
 
-    final double opacity = isOutOfStock ? 0.5 : 1.0;
+    final double opacity = isOutOfStock ? 0.6 : 1.0;
 
     return GestureDetector(
       onTap: onTap,
@@ -82,9 +86,10 @@ class ItemBox extends StatelessWidget {
                     // Image/icon zone
                     if (imageWidget != null)
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius:
+                            BorderRadius.circular(SpaceTokens.cardRadius),
                         child: SizedBox(
-                          height: 72,
+                          height: 70,
                           width: double.infinity,
                           child: imageWidget!,
                         ),
@@ -104,6 +109,7 @@ class ItemBox extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w700,
+                            color: c.text,
                             height: 1.25,
                           ),
                     ),
@@ -116,6 +122,8 @@ class ItemBox extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               fontSize: 11,
+                              color: c.textSecondary,
+                              fontWeight: FontWeight.w500,
                             ),
                       ),
                     ],
@@ -126,8 +134,7 @@ class ItemBox extends StatelessWidget {
                     Text(
                       priceLabel,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: accentColor ??
-                                Theme.of(context).colorScheme.primary,
+                            color: accentColor ?? c.primary,
                             fontWeight: FontWeight.w800,
                             fontSize: 14,
                           ),
@@ -143,6 +150,12 @@ class ItemBox extends StatelessWidget {
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                      color: isOutOfStock
+                                          ? GlowTokens.outOfStockGlow
+                                          : isLowStock
+                                              ? GlowTokens.lowStockGlow
+                                              : c.textSecondary,
                                     ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -196,18 +209,19 @@ class _DefaultIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppColors c = appColors(context);
     final Color iconColor = isOutOfStock
         ? GlowTokens.outOfStockGlow
         : isLowStock
             ? GlowTokens.lowStockGlow
-            : (accent ?? Theme.of(context).colorScheme.primary);
+            : (accent ?? c.primary);
 
     return Container(
-      height: 72,
+      height: 70,
       width: double.infinity,
       decoration: BoxDecoration(
         color: iconColor.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(SpaceTokens.cardRadius),
       ),
       child: Icon(
         isOutOfStock

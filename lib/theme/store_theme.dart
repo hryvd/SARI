@@ -1,8 +1,10 @@
-// Sar-E — Store type definitions and per-store brand theme tokens.
+// SARI — Store type definitions and per-store brand theme tokens.
 // Each store type gets its own accent color and glow palette.
 // NO BackdropFilter anywhere — only BoxShadow for glow effects.
 
 import 'package:flutter/material.dart';
+
+import 'app_theme.dart';
 
 // ─── Store Type Enum ────────────────────────────────────────────────────────
 
@@ -54,21 +56,14 @@ enum StoreType {
 class StoreColors {
   const StoreColors._();
 
-  // Sari-Sari: Energetic Red-Orange
-  static const Color sariSari = Color(0xFFC9352C);
-  static const Color sariSariDark = Color(0xFF9E2920);
-
-  // Gulay: Fresh Produce Green
-  static const Color gulay = Color(0xFF2E7D32);
-  static const Color gulayDark = Color(0xFF1B5E20);
-
-  // Rice: Warm Harvest Golden Amber
-  static const Color rice = Color(0xFFF57F17);
-  static const Color riceDark = Color(0xFFE65100);
-
-  // Carinderia: Savory Flame Terracotta
-  static const Color carinderia = Color(0xFFD84315);
-  static const Color carinderiaDark = Color(0xFFBF360C);
+  static const Color sariSari = brandRed;
+  static const Color sariSariDark = brandRed;
+  static const Color gulay = brandRed;
+  static const Color gulayDark = brandRed;
+  static const Color rice = brandRed;
+  static const Color riceDark = brandRed;
+  static const Color carinderia = brandRed;
+  static const Color carinderiaDark = brandRed;
 
   static Color forType(StoreType type) => switch (type) {
         StoreType.sariSari => sariSari,
@@ -105,19 +100,24 @@ class GlowTokens {
     required bool isLowStock,
     required bool isOutOfStock,
     Color? overrideAccent,
+    Color? surfaceColor,
+    Color? borderColor,
   }) {
+    final Color baseSurface = surfaceColor ?? surfaceCard;
+    final Color baseBorder = borderColor ?? normalBorder;
+
     if (isOutOfStock) {
       return BoxDecoration(
-        color: surfaceCard.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
+        color: baseSurface.withValues(alpha: surfaceColor != null ? 0.75 : 0.5),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: outOfStockGlow.withValues(alpha: 0.8),
           width: 1.5,
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: outOfStockGlow.withValues(alpha: 0.25),
-            blurRadius: 14,
+            color: outOfStockGlow.withValues(alpha: 0.20),
+            blurRadius: 10,
             spreadRadius: 1,
           ),
         ],
@@ -125,25 +125,25 @@ class GlowTokens {
     }
     if (isLowStock) {
       return BoxDecoration(
-        color: surfaceCard,
-        borderRadius: BorderRadius.circular(16),
+        color: baseSurface,
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: lowStockGlow.withValues(alpha: 0.9),
           width: 1.5,
         ),
         boxShadow: <BoxShadow>[
           BoxShadow(
-            color: lowStockGlow.withValues(alpha: 0.30),
-            blurRadius: 12,
+            color: lowStockGlow.withValues(alpha: 0.25),
+            blurRadius: 10,
             spreadRadius: 1,
           ),
         ],
       );
     }
     return BoxDecoration(
-      color: surfaceCard,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: normalBorder, width: 1.0),
+      color: baseSurface,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: baseBorder, width: 1.0),
     );
   }
 }
@@ -155,7 +155,7 @@ class SpaceTokens {
 
   static const double pagePadding = 16.0;
   static const double cardGap = 12.0;
-  static const double cardRadius = 16.0;
+  static const double cardRadius = 8.0;
   static const double sheetRadius = 24.0;
   static const double chipRadius = 32.0;
   static const double iconSizeGrid = 28.0;

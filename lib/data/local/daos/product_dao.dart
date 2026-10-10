@@ -82,14 +82,15 @@ class ProductDao {
 
   Future<List<Product>> search(String query) async {
     final Database db = await _db;
+    final String q = query.toLowerCase();
     final List<Map<String, dynamic>> rows = await db.rawQuery('''
       SELECT p.*, c.name AS category_name
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.category_id
-      WHERE p.is_active = 1 AND (LOWER(p.name) LIKE ? OR p.barcode = ?)
+      WHERE p.is_active = 1 AND (LOWER(p.name) LIKE ? OR p.barcode = ? OR LOWER(p.alias) LIKE ?)
       ORDER BY p.name ASC
       LIMIT 30
-    ''', <String>['%${query.toLowerCase()}%', query]);
+    ''', <String>['%$q%', query, '%$q%']);
     return rows.map(Product.fromMap).toList();
   }
 

@@ -5,6 +5,7 @@ class Product {
     this.categoryId,
     this.barcode,
     required this.name,
+    this.alias,
     required this.unitPrice,
     required this.costPrice,
     required this.stockQty,
@@ -20,6 +21,7 @@ class Product {
   final String? categoryId;
   final String? barcode;
   final String name;
+  final String? alias;
   final double unitPrice;
   final double costPrice;
   final int stockQty;
@@ -39,6 +41,7 @@ class Product {
     String? categoryId,
     String? barcode,
     String? name,
+    String? alias,
     double? unitPrice,
     double? costPrice,
     int? stockQty,
@@ -52,6 +55,7 @@ class Product {
         categoryId: categoryId ?? this.categoryId,
         barcode: barcode ?? this.barcode,
         name: name ?? this.name,
+        alias: alias ?? this.alias,
         unitPrice: unitPrice ?? this.unitPrice,
         costPrice: costPrice ?? this.costPrice,
         stockQty: stockQty ?? this.stockQty,
@@ -68,6 +72,7 @@ class Product {
         'category_id': categoryId,
         'barcode': barcode,
         'name': name,
+        'alias': alias,
         'unit_price': unitPrice,
         'cost_price': costPrice,
         'stock_qty': stockQty,
@@ -82,6 +87,7 @@ class Product {
         categoryId: m['category_id'] as String?,
         barcode: m['barcode'] as String?,
         name: m['name'] as String,
+        alias: m['alias'] as String?,
         unitPrice: (m['unit_price'] as num).toDouble(),
         costPrice: (m['cost_price'] as num? ?? 0).toDouble(),
         stockQty: (m['stock_qty'] as int? ?? 0),

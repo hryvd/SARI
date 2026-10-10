@@ -6,6 +6,7 @@ import '../../domain/adapters/gulay_adapter.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/services/portion_advisor.dart';
 import '../../domain/services/scale_calculator.dart';
+import '../../theme/app_theme.dart';
 import '../../theme/store_theme.dart';
 import '../../widgets/store_scaffold.dart';
 import '../inventory/shared/item_box_grid.dart';
@@ -21,7 +22,8 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
   static const GulayAdapter adapter = GulayAdapter();
 
   // Active cart for POS: maps productId -> {weight, total, product}
-  final Map<String, Map<String, dynamic>> _cart = <String, Map<String, dynamic>>{};
+  final Map<String, Map<String, dynamic>> _cart =
+      <String, Map<String, dynamic>>{};
 
   double get _cartTotal => _cart.values.fold<double>(
         0.0,
@@ -35,11 +37,12 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
     double currentWeight = 1.0;
     final TextEditingController weightCtrl =
         TextEditingController(text: currentWeight.toString());
+    final AppColors c = appColors(context);
 
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1E2228),
+      backgroundColor: c.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -59,16 +62,28 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
 
             return Padding(
               padding: EdgeInsets.only(
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+                bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
                 left: 20,
                 right: 20,
-                top: 20,
+                top: 14,
               ),
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
+                    // Drag handle
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 14),
+                        decoration: BoxDecoration(
+                          color: c.borderSubtle,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
                     // ── Header ─────────────────────────────────────────────
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -79,25 +94,26 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
                             children: <Widget>[
                               Text(
                                 product.name,
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: c.text,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              const SizedBox(height: 2),
                               Text(
                                 '₱${product.unitPrice.toStringAsFixed(2)} / kilo',
                                 style: TextStyle(
                                   color: adapter.brandColor,
                                   fontSize: 14,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
                             ],
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white70),
+                          icon: Icon(Icons.close, color: c.textSecondary),
                           onPressed: () => Navigator.pop(ctx),
                         ),
                       ],
@@ -105,32 +121,43 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
                     const SizedBox(height: 16),
 
                     // ── Weight Presets Chips ───────────────────────────────
-                    const Text(
+                    Text(
                       'Pumili ng Timbang (kg):',
-                      style: TextStyle(color: Color(0xFF8B949E), fontSize: 13),
+                      style: TextStyle(
+                        color: c.textSecondary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       physics: const BouncingScrollPhysics(),
                       child: Row(
-                        children: ScaleCalculator.standardPresets.map((double preset) {
-                          final bool isSelected = (currentWeight - preset).abs() < 0.001;
+                        children: ScaleCalculator.standardPresets
+                            .map((double preset) {
+                          final bool isSelected =
+                              (currentWeight - preset).abs() < 0.001;
                           return Padding(
                             padding: const EdgeInsets.only(right: 8.0),
                             child: ActionChip(
                               label: Text('${preset.toString()} kg'),
                               labelStyle: TextStyle(
-                                color: isSelected ? Colors.white : const Color(0xFFC9D1D9),
-                                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                                color: isSelected ? Colors.white : c.text,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w600,
                               ),
                               backgroundColor: isSelected
                                   ? adapter.brandColor
-                                  : GlowTokens.surfaceCard,
+                                  : c.surfaceMuted,
                               side: BorderSide(
                                 color: isSelected
                                     ? adapter.brandColor
-                                    : GlowTokens.normalBorder,
+                                    : c.borderSubtle,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
                               ),
                               onPressed: () {
                                 setModalState(() {
@@ -148,16 +175,39 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
                     // ── Custom Weight Input ────────────────────────────────
                     TextField(
                       controller: weightCtrl,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      style: TextStyle(
+                        color: c.text,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                       decoration: InputDecoration(
                         labelText: 'Ipasok ang Timbang (Kilo)',
+                        labelStyle: TextStyle(color: c.textSecondary),
                         suffixText: 'kg',
-                        suffixStyle: const TextStyle(color: Colors.white70),
-                        prefixIcon: const Icon(Icons.scale, color: Color(0xFF8B949E)),
+                        suffixStyle: TextStyle(
+                          color: c.textSecondary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        prefixIcon:
+                            Icon(Icons.scale, color: adapter.brandColor),
+                        filled: true,
+                        fillColor: c.surfaceMuted,
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 14),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: GlowTokens.normalBorder),
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: c.borderSubtle),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: c.borderSubtle),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide:
+                              BorderSide(color: adapter.brandColor, width: 1.5),
                         ),
                       ),
                       onChanged: (String val) {
@@ -173,29 +223,29 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
                     if (portionHint != null)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
+                            horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
-                          color: adapter.brandColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
+                          color: adapter.brandColor.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: adapter.brandColor.withValues(alpha: 0.4),
+                            color: adapter.brandColor.withValues(alpha: 0.35),
                           ),
                         ),
                         child: Row(
                           children: <Widget>[
-                            const Icon(
+                            Icon(
                               Icons.lightbulb_outline,
-                              color: Color(0xFFFFB300),
-                              size: 18,
+                              color: adapter.brandColor,
+                              size: 20,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 portionHint,
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: c.text,
                                   fontSize: 13,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
@@ -210,17 +260,21 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            const Text(
+                            Text(
                               'Kabuuang Presyo:',
                               style: TextStyle(
-                                  color: Color(0xFF8B949E), fontSize: 12),
+                                color: c.textSecondary,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
+                            const SizedBox(height: 2),
                             Text(
                               ScaleCalculator.formatPrice(computedPrice),
                               style: TextStyle(
                                 color: adapter.brandColor,
                                 fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w900,
                               ),
                             ),
                           ],
@@ -229,6 +283,8 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: adapter.brandColor,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
                             padding: const EdgeInsets.symmetric(
                               horizontal: 20,
                               vertical: 14,
@@ -244,13 +300,15 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
+                              fontSize: 14,
                             ),
                           ),
                           onPressed: currentWeight <= 0
                               ? null
                               : () {
                                   setState(() {
-                                    _cart[product.productId] = <String, dynamic>{
+                                    _cart[product.productId] =
+                                        <String, dynamic>{
                                       'product': product,
                                       'weight': currentWeight,
                                       'total': computedPrice,
@@ -273,6 +331,7 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppColors c = appColors(context);
     final AsyncValue<InventoryState> asyncInv = ref.watch(inventoryProvider);
 
     return StoreScaffold(
@@ -282,13 +341,13 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
           ? Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: GlowTokens.surfaceCard,
-                border: const Border(
-                  top: BorderSide(color: GlowTokens.normalBorder),
+                color: c.surface,
+                border: Border(
+                  top: BorderSide(color: c.borderSubtle),
                 ),
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.4),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 8,
                     offset: const Offset(0, -2),
                   ),
@@ -302,15 +361,19 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
                     children: <Widget>[
                       Text(
                         '$_cartItemCount gulay sa bayong',
-                        style: const TextStyle(
-                            color: Color(0xFF8B949E), fontSize: 12),
+                        style: TextStyle(
+                          color: c.textSecondary,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
+                      const SizedBox(height: 2),
                       Text(
                         ScaleCalculator.formatPrice(_cartTotal),
                         style: TextStyle(
                           color: adapter.brandColor,
                           fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w900,
                         ),
                       ),
                     ],
@@ -319,6 +382,8 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: adapter.brandColor,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 24,
                         vertical: 12,
@@ -350,7 +415,12 @@ class _GulayPosScreenState extends ConsumerState<GulayPosScreen> {
           : null,
       body: asyncInv.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (Object e, _) => Center(child: Text('Error: $e')),
+        error: (Object e, _) => Center(
+          child: Text(
+            'Error: $e',
+            style: TextStyle(color: c.text),
+          ),
+        ),
         data: (InventoryState state) {
           return StoreItemBoxGrid(
             items: state.products,

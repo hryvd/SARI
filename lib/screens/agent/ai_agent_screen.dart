@@ -53,21 +53,22 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
 
     final List<String> chips = isSeller
         ? <String>[
-            '🔮 Hulaan ang benta bukas',
-            '📅 7-Araw na Sales Forecast',
-            '⚡ Kailan ang susunod na Peak Day?',
-            'Anong kulang sa tindahan?',
+            'Hulaan ang benta bukas',
+            '7-Araw na Sales Forecast',
+            'Kailan ang susunod na Peak Day?',
+            'Ano ang kailangan kong i-restock?',
             'Mag-restock ng Lucky Me, good for 3 days',
-            'Ilan ang naibenta ko kahapon?',
+            'Ilan ang naibenta ko ngayong araw?',
             'Ilista kay Aling Nena ang 120 pesos na utang',
-            'Magkano ang 1.8 kilo ng kamatis?',
-            'Ilang adobo ang lutuin ko bukas?',
+            'Dagdag 20 na Lucky Me',
           ]
         : <String>[
             'Kulang sa bahay',
-            'Nearby stores',
-            'Hanap: sardinas',
+            'Mga paninda sa tindahan',
             'Magkano ang bigas?',
+            'May itlog ba sa tindahan?',
+            'Bumili ng 3 itlog',
+            'I-order mo na yung cart ko',
           ];
 
     return Scaffold(
@@ -135,6 +136,9 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
   }
 
   void _showModelInfoDialog(BuildContext context) {
+    const Color primaryRed = Color(0xFFD62828);
+    const Color accentGold = Color(0xFFB45309);
+
     showDialog<void>(
       context: context,
       builder: (BuildContext ctx) {
@@ -142,10 +146,10 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Row(
             children: <Widget>[
-              Icon(Icons.psychology, color: Color(0xFF1E6E5A), size: 24),
+              Icon(Icons.psychology, color: primaryRed, size: 24),
               SizedBox(width: 8),
               Text(
-                'Sar-E AI Model Info',
+                'SARI AI Model Info',
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ],
@@ -155,29 +159,43 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Trained On-Device Sales Predictor',
+                'Google DeepMind Gemma 4 E2B',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
-                  color: Color(0xFF1E6E5A),
+                  color: primaryRed,
                 ),
               ),
-              SizedBox(height: 8),
+              SizedBox(height: 4),
               Text(
-                '• Model: 30-Tree Gradient Boosting Regressor (GBR)\n'
-                '• Dataset: 15,446 Sari-Sari Transactions (sari_sari_dataset.csv)\n'
-                '• Target: Daily Sales Revenue (₱ PHP)\n'
-                '• Features: 11 temporal & lagged features (Payday 15th/30th, Weekends, Holidays, Rolling 7-Day Revenue)\n'
-                '• Latency: < 2ms pure Dart on-device execution\n'
-                '• Offline: 100% local — walang data o internet na kailangan',
-                style: TextStyle(fontSize: 12, height: 1.4),
+                '• Architecture: Gemma4ForConditionalGeneration (Edge 2B)\n'
+                '• Context Window: 128K (131,072 tokens)\n'
+                '• Multimodal: Text, Vision ID, Audio PTT, Tool Calling\n'
+                '• Local Weights: gemma-4-transformers-gemma-4-e2b-v1 (9.54 GB)\n'
+                '• Privacy: Zero network calls sa agent path (100% offline)\n',
+                style: TextStyle(fontSize: 12, height: 1.35),
+              ),
+              Divider(height: 16),
+              Text(
+                'SARI Daily Sales GBR Forecaster',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: accentGold,
+                ),
+              ),
+              SizedBox(height: 4),
+              Text(
+                '• 30-Tree Gradient Boosting Regressor (GBR)\n'
+                '• 15,446 real transactions · <2ms execution latency',
+                style: TextStyle(fontSize: 12, height: 1.35),
               ),
             ],
           ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Isara', style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text('Isara', style: TextStyle(fontWeight: FontWeight.bold, color: primaryRed)),
             ),
           ],
         );
@@ -186,30 +204,30 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
   }
 
   Widget _buildModelStatusBanner(BuildContext context, AgentState state) {
-    const Color brandGreen = Color(0xFF1E6E5A);
-    const Color brandAmber = Color(0xFFC8861A);
+    const Color primaryRed = Color(0xFFD62828);
+    const Color accentGold = Color(0xFFB45309);
 
     if (state.downloadProgress != null) {
       return Container(
         margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: brandAmber.withValues(alpha: 0.12),
+          color: accentGold.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: brandAmber),
+          border: Border.all(color: accentGold),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Row(
               children: <Widget>[
-                const Icon(Icons.sync, color: brandAmber, size: 20),
+                const Icon(Icons.sync, color: accentGold, size: 20),
                 const SizedBox(width: 8),
                 const Text(
-                  'Sini-sync ang Sar-E GBR Sales Model (30 Trees)...',
+                  'Sini-sync ang SARI GBR Sales Model (30 Trees)...',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: brandAmber,
+                    color: accentGold,
                     fontSize: 13,
                   ),
                 ),
@@ -226,7 +244,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
               child: LinearProgressIndicator(
                 value: state.downloadProgress,
                 backgroundColor: Colors.black12,
-                valueColor: const AlwaysStoppedAnimation<Color>(brandAmber),
+                valueColor: const AlwaysStoppedAnimation<Color>(accentGold),
                 minHeight: 6,
               ),
             ),
@@ -242,21 +260,21 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
         margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: brandGreen.withValues(alpha: 0.08),
+          color: primaryRed.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: brandGreen.withValues(alpha: 0.2)),
+          border: Border.all(color: primaryRed.withValues(alpha: 0.2)),
         ),
         child: Row(
           children: <Widget>[
-            const Icon(Icons.auto_graph, color: brandGreen, size: 18),
+            const Icon(Icons.auto_graph, color: primaryRed, size: 18),
             const SizedBox(width: 8),
-            const Expanded(
+            Expanded(
               child: Text(
-                'Sar-E AI Engine: GBR v1.0.0 (30 Trees) · 100% Offline Active',
-                style: TextStyle(
+                'SARI AI Engine: ${state.modelStatus}',
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: brandGreen,
+                  color: primaryRed,
                 ),
               ),
             ),
@@ -264,7 +282,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: brandGreen,
+                color: primaryRed,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: const Text(
@@ -286,8 +304,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
   Widget _buildMessageBubble(
       BuildContext context, AgentMessage msg, bool isSeller) {
     final AppColors c = appColors(context);
-    const Color brandGreen = Color(0xFF1E6E5A);
-    const Color brandAmber = Color(0xFFC8861A);
+    const Color primaryRed = Color(0xFFD62828);
 
     if (msg.isUser) {
       return Padding(
@@ -301,7 +318,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 12),
                 decoration: const BoxDecoration(
-                  color: brandGreen,
+                  color: primaryRed,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20),
                     topRight: Radius.circular(20),
@@ -334,17 +351,17 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: brandAmber,
+              color: primaryRed,
               shape: BoxShape.circle,
               boxShadow: <BoxShadow>[
                 BoxShadow(
-                  color: brandAmber.withValues(alpha: 0.3),
+                  color: primaryRed.withValues(alpha: 0.3),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
                 ),
               ],
             ),
-            child: const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
+            child: const Icon(Icons.psychology_alt_rounded, color: Colors.white, size: 20),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -389,6 +406,34 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                         const SizedBox(height: 12),
                         _buildDraftCard(context, msg),
                       ],
+                      if (!msg.isUser && (msg.intent != null || msg.explanation != null)) ...<Widget>[
+                        const SizedBox(height: 8),
+                        InkWell(
+                          onTap: () => _showTransparencySheet(context, msg),
+                          borderRadius: BorderRadius.circular(8),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Icon(Icons.help_outline_rounded,
+                                    size: 14,
+                                    color: primaryRed.withValues(alpha: 0.8)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Bakit ito ang sagot?',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: primaryRed.withValues(alpha: 0.9),
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -400,7 +445,168 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
     );
   }
 
+  void _showTransparencySheet(BuildContext context, AgentMessage msg) {
+    const Color primaryRed = Color(0xFFD62828);
+    const Color accentGold = Color(0xFFB45309);
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (BuildContext ctx) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            20,
+            20,
+            MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const Row(
+                children: <Widget>[
+                  Icon(Icons.shield_outlined, color: primaryRed, size: 22),
+                  SizedBox(width: 8),
+                  Text(
+                    'Paliwanag ng AI (Transparency Audit)',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEF3C7),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: accentGold.withValues(alpha: 0.4)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        const Text(
+                          'Natukoy na Layunin (Intent):',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: accentGold,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: accentGold,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            msg.intent ?? 'Pangkalahatang Tanong',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: <Widget>[
+                        const Text(
+                          'Kaukulang Aksyon (Tool):',
+                          style: TextStyle(fontSize: 12, color: Colors.black87),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          msg.tool ?? 'none',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: <Widget>[
+                        const Text(
+                          'Antas ng Kumpiyansa:',
+                          style: TextStyle(fontSize: 12, color: Colors.black87),
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${((msg.confidence ?? 1.0) * 100).toInt()}%',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: primaryRed,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                msg.explanation ??
+                    'Pinroseso nang 100% offline sa iyong device gamit ang lokal na SARI NLU Engine at SQLite. Walang ipinadalang data sa cloud.',
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Colors.black87,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryRed,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    minimumSize: const Size(0, 44),
+                  ),
+                  child: const Text('Naintindihan'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildRiskBadge(AgentRisk risk) {
+    const Color primaryRed = Color(0xFFD62828);
+    const Color accentGold = Color(0xFFB45309);
     Color bg;
     Color fg;
     String label;
@@ -408,17 +614,17 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
 
     switch (risk) {
       case AgentRisk.read:
-        bg = const Color(0xFF1E6E5A).withValues(alpha: 0.12);
-        fg = const Color(0xFF1E6E5A);
+        bg = primaryRed.withValues(alpha: 0.12);
+        fg = primaryRed;
         label = 'READ ONLY · TALAAN';
         icon = Icons.visibility_outlined;
       case AgentRisk.draft:
         bg = const Color(0xFFFEF3C7);
-        fg = const Color(0xFFB45309);
+        fg = accentGold;
         label = 'DRAFT · KAILANGAN NG CONFIRM';
         icon = Icons.edit_note;
       case AgentRisk.change:
-        bg = const Color(0xFF1E6E5A);
+        bg = primaryRed;
         fg = Colors.white;
         label = 'CHANGE · NAITALA';
         icon = Icons.check_circle_outline;
@@ -457,8 +663,8 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
   Widget _buildDraftCard(BuildContext context, AgentMessage msg) {
     final AgentDraft draft = msg.draft!;
     final ReorderDraft? reorder = draft.reorderDraft;
-    const Color brandAmber = Color(0xFFC8861A);
-    const Color brandGreen = Color(0xFF1E6E5A);
+    const Color accentGold = Color(0xFFB45309);
+    const Color primaryRed = Color(0xFFD62828);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -565,7 +771,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
-                  color: brandGreen,
+                  color: primaryRed,
                 ),
               ),
             ],
@@ -582,7 +788,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                       ref.read(agentProvider.notifier).confirmDraft(msg.id);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: brandGreen,
+                      backgroundColor: primaryRed,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -602,8 +808,8 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                       ref.read(agentProvider.notifier).undoDraft(msg.id);
                     },
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: brandAmber,
-                      side: const BorderSide(color: brandAmber, width: 1.5),
+                      foregroundColor: accentGold,
+                      side: const BorderSide(color: accentGold, width: 1.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -646,7 +852,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                       ref.read(agentProvider.notifier).confirmDraft(msg.id);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: brandGreen,
+                      backgroundColor: primaryRed,
                       foregroundColor: Colors.white,
                       minimumSize: const Size(0, 44),
                     ),
@@ -671,18 +877,18 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
               decoration: BoxDecoration(
-                color: brandGreen.withValues(alpha: 0.1),
+                color: primaryRed.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: <Widget>[
-                  const Icon(Icons.check_circle, color: brandGreen, size: 18),
+                  const Icon(Icons.check_circle, color: primaryRed, size: 18),
                   const SizedBox(width: 6),
                   const Text(
                     'Na-confirm na ng May-ari',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: brandGreen,
+                      color: primaryRed,
                       fontSize: 13,
                     ),
                   ),
@@ -694,7 +900,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                     icon: const Icon(Icons.undo, size: 16),
                     label: const Text('Undo (6s)'),
                     style: TextButton.styleFrom(
-                      foregroundColor: brandAmber,
+                      foregroundColor: accentGold,
                       visualDensity: VisualDensity.compact,
                     ),
                   ),
@@ -706,7 +912,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
               spacing: 6,
               children: <Widget>[
                 ActionChip(
-                  avatar: const Icon(Icons.share, size: 14, color: brandGreen),
+                  avatar: const Icon(Icons.share, size: 14, color: primaryRed),
                   label: const Text('I-share sa Messenger / SMS',
                       style: TextStyle(fontSize: 11)),
                   onPressed: () {
@@ -722,7 +928,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                   },
                 ),
                 ActionChip(
-                  avatar: const Icon(Icons.print, size: 14, color: brandGreen),
+                  avatar: const Icon(Icons.print, size: 14, color: primaryRed),
                   label: const Text('I-print', style: TextStyle(fontSize: 11)),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -734,7 +940,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                 ),
                 ActionChip(
                   avatar: const Icon(Icons.checklist,
-                      size: 14, color: brandGreen),
+                      size: 14, color: primaryRed),
                   label: const Text('Checklist sa Palengke',
                       style: TextStyle(fontSize: 11)),
                   onPressed: () {},
@@ -758,8 +964,8 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
 
   Widget _buildVoiceHeardCard(
       BuildContext context, String heard, bool isSeller) {
-    const Color brandAmber = Color(0xFFC8861A);
-    const Color brandGreen = Color(0xFF1E6E5A);
+    const Color primaryRed = Color(0xFFD62828);
+    const Color accentGold = Color(0xFFB45309);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -767,7 +973,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
       decoration: BoxDecoration(
         color: const Color(0xFFFEF3C7),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: brandAmber),
+        border: Border.all(color: accentGold),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -777,7 +983,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: brandAmber,
+              color: accentGold,
             ),
           ),
           const SizedBox(height: 4),
@@ -797,7 +1003,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                     _submitText(heard, isSeller);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: brandGreen,
+                    backgroundColor: primaryRed,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(0, 40),
                     shape: RoundedRectangleBorder(
@@ -830,8 +1036,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
   Widget _buildCommandBar(
       BuildContext context, AgentState state, bool isSeller) {
     final AppColors c = appColors(context);
-    const Color brandGreen = Color(0xFF1E6E5A);
-    const Color brandAmber = Color(0xFFC8861A);
+    const Color primaryRed = Color(0xFFD62828);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
@@ -863,7 +1068,7 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
-                  borderSide: const BorderSide(color: brandGreen, width: 2),
+                  borderSide: const BorderSide(color: primaryRed, width: 2),
                 ),
               ),
               textInputAction: TextInputAction.send,
@@ -881,19 +1086,19 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: brandAmber,
+                color: state.isListening ? const Color(0xFFB45309) : primaryRed,
                 shape: BoxShape.circle,
                 boxShadow: state.isListening
                     ? <BoxShadow>[
                         BoxShadow(
-                          color: brandAmber.withValues(alpha: 0.6),
+                          color: const Color(0xFFFFC93C).withValues(alpha: 0.6),
                           blurRadius: 12,
                           spreadRadius: 4,
                         ),
                       ]
                     : <BoxShadow>[
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
+                          color: primaryRed.withValues(alpha: 0.3),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -915,11 +1120,11 @@ class _AiAgentScreenState extends ConsumerState<AiAgentScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: brandGreen,
+                color: primaryRed,
                 shape: BoxShape.circle,
                 boxShadow: <BoxShadow>[
                   BoxShadow(
-                    color: brandGreen.withValues(alpha: 0.3),
+                    color: primaryRed.withValues(alpha: 0.3),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),

@@ -181,13 +181,15 @@ class _AnalyticsContent extends ConsumerWidget {
                       value: '₱${state.revenue.toStringAsFixed(2)}',
                       sublabel: '${state.txnCount} orders',
                       color: storeAccent,
+                      icon: Icons.point_of_sale_rounded,
                     ),
                     const SizedBox(width: 10),
                     _AnalyticsKpiCard(
                       label: 'ESTIMATED PROFIT',
                       value: '₱${state.grossProfit.toStringAsFixed(2)}',
                       sublabel: '${state.profitMargin.toStringAsFixed(1)}% Margin',
-                      color: const Color(0xFF2E7D32),
+                      color: const Color(0xFFB45309),
+                      icon: Icons.trending_up_rounded,
                     ),
                   ],
                 ),
@@ -228,7 +230,7 @@ class _AnalyticsContent extends ConsumerWidget {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: c.surface,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: c.border),
                   ),
                   child: Column(
@@ -464,7 +466,7 @@ class _AnalyticsContent extends ConsumerWidget {
     try {
       final Directory dir = await getApplicationDocumentsDirectory();
       final String fileName =
-          'SarE_Report_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.pdf';
+          'SARI_Report_${DateFormat('yyyyMMdd_HHmmss').format(DateTime.now())}.pdf';
       final String filePath = '${dir.path}/$fileName';
       final File file = File(filePath);
       await file.writeAsBytes(await doc.save());
@@ -596,12 +598,14 @@ class _AnalyticsKpiCard extends StatelessWidget {
     required this.value,
     required this.sublabel,
     required this.color,
+    this.icon,
   });
 
   final String label;
   final String value;
   final String sublabel;
   final Color color;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -610,35 +614,42 @@ class _AnalyticsKpiCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: c.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: c.border),
-          boxShadow: <BoxShadow>[
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: color.withValues(alpha: 0.25), width: 1.2),
+          boxShadow: const <BoxShadow>[
             BoxShadow(
-              color: color.withValues(alpha: 0.05),
+              color: Color(0x0C000000),
               blurRadius: 10,
-              spreadRadius: 1,
+              offset: Offset(0, 3),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Text(
-              label,
-              style: TextStyle(
-                color: c.textSecondary,
-                fontSize: 10,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: c.textSecondary,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                if (icon != null)
+                  Icon(icon, size: 16, color: color),
+              ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               value,
               style: TextStyle(
                 color: color,
-                fontSize: 18,
+                fontSize: 19,
                 fontWeight: FontWeight.w900,
               ),
             ),

@@ -109,6 +109,24 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
           ?.storeName;
     }
 
+    final String? userRole = prefs.getString('userRole');
+    if (userRole == 'buyer') {
+      final UserCredential buyerUser = UserCredential(
+        userId: 'buyer_guest',
+        pinHash: '',
+        role: 'buyer',
+        storeName: storeNameHint ?? 'SARI Tindahan',
+      );
+      return AuthState(
+        user: buyerUser,
+        isFirstRun: false,
+        storeId: storeId ?? 'local_store',
+        isOfflineMode: isOfflineMode,
+        storeNameHint: storeNameHint,
+        storeType: storeType,
+      );
+    }
+
     if (!hasOwner || storeId == null) {
       return AuthState(
         isFirstRun: true,
@@ -277,7 +295,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     }
     try {
       final bool didAuthenticate = await _localAuth.authenticate(
-        localizedReason: 'Authenticate to access Sar-E',
+        localizedReason: 'Authenticate to access SARI',
         biometricOnly: true,
       );
       if (didAuthenticate) {
@@ -291,6 +309,8 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
             lastLoginAt: DateTime.now(),
           );
           await _dao.update(loggedIn);
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('userRole', 'owner');
           state = AsyncData<AuthState>(state.value!.copyWith(user: loggedIn));
           return true;
         }
@@ -331,9 +351,28 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       lastLoginAt: DateTime.now(),
     );
     await _dao.update(loggedIn);
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userRole', loggedIn.role);
     state = AsyncData<AuthState>(
         currentState.copyWith(user: loggedIn, isLoading: false));
     return true;
+  }
+
+  Future<void> loginAsBuyer() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userRole', 'buyer');
+    final String storeId = prefs.getString('storeId') ?? 'local_store';
+    final UserCredential buyerUser = UserCredential(
+      userId: 'buyer_guest',
+      pinHash: '',
+      role: 'buyer',
+      storeName: state.value?.storeNameHint ?? 'SARI Tindahan',
+    );
+    state = AsyncData<AuthState>(state.value!.copyWith(
+      user: buyerUser,
+      storeId: storeId,
+      isLoading: false,
+    ));
   }
 
   // ─── Session ───────────────────────────────────────────────────────────────
@@ -342,6 +381,7 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   /// Returns to LoginScreen.
   Future<void> logout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userRole');
     final String? storeId = prefs.getString('storeId');
     final bool isOfflineMode = prefs.getBool('isOfflineMode') ?? false;
     final bool hasOwner = await _dao.exists();

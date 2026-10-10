@@ -3,23 +3,37 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Bilingual localization — translates key UI labels.
 /// Filipino is pure Filipino when selected; English is fully English.
-enum AppLocale { en, fil }
+enum AppLocale { en, fil, taglish }
 
 class LocaleNotifier extends StateNotifier<AppLocale> {
-  LocaleNotifier() : super(AppLocale.fil) {
+  LocaleNotifier() : super(AppLocale.taglish) {
     _load();
   }
 
   Future<void> _load() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? saved = prefs.getString('app_locale');
-    if (saved == 'en') state = AppLocale.en;
+    final String? saved =
+        prefs.getString('sari_language') ?? prefs.getString('app_locale');
+    if (saved == 'en' || saved == 'english') {
+      state = AppLocale.en;
+    } else if (saved == 'fil' || saved == 'filipino') {
+      state = AppLocale.fil;
+    } else {
+      state = AppLocale.taglish;
+    }
   }
 
   Future<void> setLocale(AppLocale locale) async {
     state = locale;
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('app_locale', locale == AppLocale.en ? 'en' : 'fil');
+    final String code = locale == AppLocale.en ? 'en' : 'fil';
+    final String sariLang = locale == AppLocale.en
+        ? 'english'
+        : locale == AppLocale.fil
+            ? 'filipino'
+            : 'taglish';
+    await prefs.setString('app_locale', code);
+    await prefs.setString('sari_language', sariLang);
   }
 }
 
@@ -200,9 +214,9 @@ const Map<AppLocale, Map<String, String>> _strings =
     'low_stock_alerts': 'Alerto sa Mababang Stock',
     'overdue_alerts': 'Alerto sa Lampas na sa Deadline',
     'dark_mode': 'Dark Mode',
-    'about': 'Tungkol sa Sar-E',
+    'about': 'Tungkol sa SARI',
     'about_body':
-        'Sar-E ay isang matalinong POS at pamamahala ng tindahan na app para sa Filipino sari-sari stores. Ginawa gamit ang Flutter at Firebase.',
+        'SARI ay isang matalinong POS at pamamahala ng tindahan na app para sa sari-sari stores, gulay, bigasan, at carinderia. Ginawa gamit ang Flutter at local SQLite.',
 
     // ── Profile & Sync ──
     'change_pin': 'Palitan ang PIN',
@@ -256,7 +270,7 @@ const Map<AppLocale, Map<String, String>> _strings =
     'text': 'I-text',
 
     // ── Auth / Setup ──
-    'welcome': 'Maligayang Pagdating sa Sar-E',
+    'welcome': 'Maligayang Pagdating sa SARI',
     'setup_subtitle': 'I-setup ang iyong point-of-sale sa ilang segundo.',
     'continue_google': 'Magpatuloy gamit ang Google',
     'continue_offline': 'Magpatuloy nang walang account',
@@ -469,9 +483,9 @@ const Map<AppLocale, Map<String, String>> _strings =
     'low_stock_alerts': 'Low Stock Alerts',
     'overdue_alerts': 'Overdue Alerts',
     'dark_mode': 'Dark Mode',
-    'about': 'About Sar-E',
+    'about': 'About SARI',
     'about_body':
-        'Sar-E is a smart POS and store management app for Filipino sari-sari stores. Built with Flutter and Firebase.',
+        'SARI is a smart POS and store management app for Filipino sari-sari stores, gulay, bigasan, and carinderia. Built with Flutter and SQLite.',
 
     // ── Profile & Sync ──
     'change_pin': 'Change PIN',
@@ -524,7 +538,7 @@ const Map<AppLocale, Map<String, String>> _strings =
     'text': 'Text',
 
     // ── Auth / Setup ──
-    'welcome': 'Welcome to Sar-E',
+    'welcome': 'Welcome to SARI',
     'setup_subtitle': 'Set up your point-of-sale in seconds.',
     'continue_google': 'Continue with Google',
     'continue_offline': 'Continue without account',
@@ -570,4 +584,7 @@ const Map<AppLocale, Map<String, String>> _strings =
 
 /// Convenience function to get localized string
 String t(AppLocale locale, String key) =>
-    _strings[locale]?[key] ?? _strings[AppLocale.en]?[key] ?? key;
+    _strings[locale]?[key] ??
+    _strings[AppLocale.fil]?[key] ??
+    _strings[AppLocale.en]?[key] ??
+    key;

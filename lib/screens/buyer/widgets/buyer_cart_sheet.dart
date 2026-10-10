@@ -29,12 +29,12 @@ class BuyerCartSheet extends ConsumerWidget {
         maxHeight: MediaQuery.of(context).size.height * 0.8,
       ),
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: c.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        boxShadow: const <BoxShadow>[
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: <BoxShadow>[
           BoxShadow(
-            color: Colors.black26,
+            color: Color(0x14000000),
             blurRadius: 16,
             offset: Offset(0, -4),
           ),
@@ -52,7 +52,7 @@ class BuyerCartSheet extends ConsumerWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: c.border,
+                  color: const Color(0xFFDDD5CE),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -165,21 +165,21 @@ class BuyerCartSheet extends ConsumerWidget {
                               child: Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: c.surfaceMuted,
+                                  color: const Color(0xFFF7F5F2),
                                   borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: c.border),
+                                  border: Border.all(color: const Color(0xFFEDE8E1)),
                                 ),
-                                child: Icon(Icons.remove, size: 16, color: c.text),
+                                child: const Icon(Icons.remove, size: 16, color: Color(0xFF1F1A17)),
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(horizontal: 10),
                               child: Text(
                                 '${item.qty}',
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w800,
-                                  color: c.text,
+                                  color: Color(0xFF1F1A17),
                                 ),
                               ),
                             ),
@@ -204,10 +204,10 @@ class BuyerCartSheet extends ConsumerWidget {
                           child: Text(
                             '₱${item.subtotal.toStringAsFixed(2)}',
                             textAlign: TextAlign.end,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w800,
-                              color: c.text,
+                              color: Color(0xFF1F1A17),
                             ),
                           ),
                         ),
@@ -221,9 +221,9 @@ class BuyerCartSheet extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: c.surfaceMuted,
+                  color: const Color(0xFFF9F7F5),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: c.border),
+                  border: Border.all(color: const Color(0xFFEDE8E1)),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

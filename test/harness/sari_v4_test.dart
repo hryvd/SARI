@@ -74,10 +74,10 @@ void main() {
         totalCost: 288.0,
       );
 
-      final ReorderDraft draft = ReorderDraft(
+      const ReorderDraft draft = ReorderDraft(
         title: 'Restock Order',
         coverDays: 3,
-        lines: const <ReorderLine>[l1, l2],
+        lines: <ReorderLine>[l1, l2],
         totalCost: 888.0,
       );
 

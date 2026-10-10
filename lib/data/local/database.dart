@@ -10,7 +10,7 @@ class AppDatabase {
   AppDatabase._();
 
   static const String _dbName = 'sare.db';
-  static const int _version = 4;
+  static const int _version = 6;
 
   static Database? _db;
 
@@ -74,6 +74,7 @@ class AppDatabase {
         category_id TEXT REFERENCES categories(category_id),
         barcode     TEXT UNIQUE,
         name        TEXT NOT NULL,
+        alias       TEXT,
         unit_price  REAL NOT NULL,
         cost_price  REAL NOT NULL DEFAULT 0,
         stock_qty   INTEGER NOT NULL DEFAULT 0,
@@ -130,6 +131,8 @@ class AppDatabase {
       CREATE TABLE transactions (
         transaction_id TEXT PRIMARY KEY,
         receipt_id     TEXT,
+        reference_code TEXT,
+        qr_payload     TEXT,
         timestamp      TEXT NOT NULL,
         payment_method TEXT NOT NULL,
         total_amount   REAL NOT NULL,
@@ -142,6 +145,7 @@ class AppDatabase {
     await db
         .execute('CREATE INDEX idx_txn_timestamp ON transactions(timestamp)');
     await db.execute('CREATE INDEX idx_txn_status ON transactions(status)');
+    await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_txn_ref ON transactions(reference_code)');
 
     await db.execute('''
       CREATE TABLE transaction_line_items (
@@ -320,6 +324,58 @@ class AppDatabase {
     await db.execute(
         'CREATE INDEX idx_ledger_customer ON ledger_entries(customer_id)');
 
+    // ── Phase AI-1: Suppliers, Restock Drafts, Payment Methods, and AI Logs ──
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS suppliers (
+        id              TEXT PRIMARY KEY,
+        name            TEXT NOT NULL,
+        contact_person  TEXT,
+        phone           TEXT,
+        items_supplied  TEXT,
+        created_at      TEXT NOT NULL,
+        updated_at      TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS restock_drafts (
+        id              TEXT PRIMARY KEY,
+        title           TEXT NOT NULL,
+        lines_json      TEXT NOT NULL,
+        total_cost      REAL NOT NULL,
+        status          TEXT NOT NULL DEFAULT 'open',
+        created_at      TEXT NOT NULL,
+        updated_at      TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS payment_methods (
+        id              TEXT PRIMARY KEY,
+        name            TEXT NOT NULL,
+        code            TEXT NOT NULL UNIQUE,
+        is_enabled      INTEGER NOT NULL DEFAULT 1,
+        qr_data         TEXT,
+        account_details TEXT,
+        updated_at      TEXT NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS ai_command_log (
+        id              TEXT PRIMARY KEY,
+        user_id         TEXT,
+        input_text      TEXT NOT NULL,
+        intent          TEXT NOT NULL,
+        slots_json      TEXT NOT NULL,
+        confidence      REAL NOT NULL,
+        was_corrected   INTEGER NOT NULL DEFAULT 0,
+        created_at      TEXT NOT NULL
+      )
+    ''');
+    await db.execute(
+        'CREATE INDEX IF NOT EXISTS idx_ai_log_time ON ai_command_log(created_at)');
+
     await _seedDefaultCategories(db);
   }
 
@@ -415,6 +471,69 @@ class AppDatabase {
           'CREATE INDEX IF NOT EXISTS idx_ledger_timestamp ON ledger_entries(timestamp)');
       await db.execute(
           'CREATE INDEX IF NOT EXISTS idx_ledger_customer ON ledger_entries(customer_id)');
+    }
+    if (oldVersion < 5) {
+      try {
+        await db.execute('ALTER TABLE products ADD COLUMN alias TEXT');
+      } catch (_) {}
+    }
+    if (oldVersion < 6) {
+      try {
+        await db.execute('ALTER TABLE transactions ADD COLUMN reference_code TEXT');
+      } catch (_) {}
+      try {
+        await db.execute('ALTER TABLE transactions ADD COLUMN qr_payload TEXT');
+      } catch (_) {}
+      try {
+        await db.execute('CREATE UNIQUE INDEX IF NOT EXISTS idx_txn_ref ON transactions(reference_code)');
+      } catch (_) {}
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS suppliers (
+          id              TEXT PRIMARY KEY,
+          name            TEXT NOT NULL,
+          contact_person  TEXT,
+          phone           TEXT,
+          items_supplied  TEXT,
+          created_at      TEXT NOT NULL,
+          updated_at      TEXT NOT NULL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS restock_drafts (
+          id              TEXT PRIMARY KEY,
+          title           TEXT NOT NULL,
+          lines_json      TEXT NOT NULL,
+          total_cost      REAL NOT NULL,
+          status          TEXT NOT NULL DEFAULT 'open',
+          created_at      TEXT NOT NULL,
+          updated_at      TEXT NOT NULL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS payment_methods (
+          id              TEXT PRIMARY KEY,
+          name            TEXT NOT NULL,
+          code            TEXT NOT NULL UNIQUE,
+          is_enabled      INTEGER NOT NULL DEFAULT 1,
+          qr_data         TEXT,
+          account_details TEXT,
+          updated_at      TEXT NOT NULL
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS ai_command_log (
+          id              TEXT PRIMARY KEY,
+          user_id         TEXT,
+          input_text      TEXT NOT NULL,
+          intent          TEXT NOT NULL,
+          slots_json      TEXT NOT NULL,
+          confidence      REAL NOT NULL,
+          was_corrected   INTEGER NOT NULL DEFAULT 0,
+          created_at      TEXT NOT NULL
+        )
+      ''');
+      await db.execute(
+          'CREATE INDEX IF NOT EXISTS idx_ai_log_time ON ai_command_log(created_at)');
     }
   }
 

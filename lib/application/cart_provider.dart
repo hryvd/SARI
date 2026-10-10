@@ -205,14 +205,14 @@ class CartNotifier extends Notifier<CartState> {
 
     state = state.copyWith(isProcessing: true, clearError: true);
 
-    // Grab store name from auth — uses actual store name, not hardcoded
-    final String storeName =
-        ref.read(authProvider).value?.user?.storeName ?? 'My Store';
-
     try {
-      final String txnId = _uuid.v4();
-      final String receiptId = _uuid.v4();
+      final String storeName =
+          ref.read(authProvider).value?.user?.storeName ?? 'My Store';
       final DateTime now = DateTime.now();
+      final String txnId = _uuid.v4();
+      final String shortSuffix = _uuid.v4().substring(0, 6).toUpperCase();
+      final String receiptId =
+          'REF-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-$shortSuffix';
 
       final bool isCash = state.paymentMethod == 'cash';
       // For ewallet: cashier confirms payment received → mark completed immediately

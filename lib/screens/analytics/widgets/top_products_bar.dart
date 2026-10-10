@@ -23,7 +23,7 @@ class TopProductsBarView extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: c.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: c.border),
         boxShadow: <BoxShadow>[
           BoxShadow(

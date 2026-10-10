@@ -31,9 +31,9 @@ class BuyerQrDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Container(
         decoration: BoxDecoration(
-          color: c.surface,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: c.border),
+          border: Border.all(color: const Color(0xFFEDE8E1)),
           boxShadow: const <BoxShadow>[
             BoxShadow(
               color: Colors.black38,

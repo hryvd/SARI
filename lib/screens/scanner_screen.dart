@@ -7,8 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 import '../application/cart_provider.dart';
+import '../application/inventory_provider.dart';
 import '../domain/entities/buyer_order.dart';
 import '../domain/entities/product.dart';
 import '../domain/entities/transaction.dart';
@@ -27,7 +27,318 @@ class ScannerScreen extends ConsumerStatefulWidget {
 
 class _ScannerScreenState extends ConsumerState<ScannerScreen> {
   final TextEditingController _searchCtrl = TextEditingController();
-  bool _showSearch = false;
+  String _selectedCategory = 'Lahat';
+  bool _hideOfflineNotice = false;
+
+  static const List<String> _categories = <String>[
+    'Lahat',
+    'Noodles',
+    'Drinks',
+    'Snacks',
+    'Fresh',
+    'Rice',
+    'Home',
+    'Cooking',
+    'Canned',
+  ];
+
+  static final List<Product> _defaultFallbackProducts = <Product>[
+    Product(
+      productId: 'seed_pos_1',
+      name: 'Lucky Me Pancit Canton',
+      unitPrice: 16.0,
+      costPrice: 12.5,
+      stockQty: 14,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Noodles',
+      barcode: '4800016004310',
+    ),
+    Product(
+      productId: 'seed_pos_2',
+      name: 'Kopiko 3-in-1',
+      unitPrice: 8.0,
+      costPrice: 6.2,
+      stockQty: 42,
+      threshold: 15,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Drinks',
+      barcode: '4800016004314',
+    ),
+    Product(
+      productId: 'seed_pos_3',
+      name: 'Coke Sakto',
+      unitPrice: 15.0,
+      costPrice: 12.0,
+      stockQty: 18,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Drinks',
+      barcode: '4800016004311',
+    ),
+    Product(
+      productId: 'seed_pos_4',
+      name: 'Piattos',
+      unitPrice: 20.0,
+      costPrice: 16.0,
+      stockQty: 9,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Snacks',
+      barcode: '4800016004309',
+    ),
+    Product(
+      productId: 'seed_pos_5',
+      name: 'Itlog (1 pc)',
+      unitPrice: 9.0,
+      costPrice: 7.5,
+      stockQty: 29,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Fresh',
+    ),
+    Product(
+      productId: 'seed_pos_6',
+      name: 'Bigas Sinandomeng (1 kg)',
+      unitPrice: 58.0,
+      costPrice: 52.0,
+      stockQty: 2,
+      threshold: 5,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Rice',
+    ),
+    Product(
+      productId: 'seed_pos_7',
+      name: 'Safeguard',
+      unitPrice: 38.0,
+      costPrice: 31.0,
+      stockQty: 11,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Home',
+    ),
+    Product(
+      productId: 'seed_pos_8',
+      name: 'Surf Sachet',
+      unitPrice: 7.0,
+      costPrice: 5.4,
+      stockQty: 60,
+      threshold: 15,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Home',
+    ),
+    Product(
+      productId: 'seed_pos_9',
+      name: 'Mang Tomas',
+      unitPrice: 24.0,
+      costPrice: 19.0,
+      stockQty: 10,
+      threshold: 5,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Cooking',
+    ),
+    Product(
+      productId: 'seed_pos_10',
+      name: 'Nissin Cup Noodles',
+      unitPrice: 28.0,
+      costPrice: 23.0,
+      stockQty: 19,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Noodles',
+    ),
+    Product(
+      productId: 'seed_pos_11',
+      name: 'Payless Pancit Canton',
+      unitPrice: 14.0,
+      costPrice: 11.0,
+      stockQty: 25,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Noodles',
+    ),
+    Product(
+      productId: 'seed_pos_12',
+      name: 'Milo Sachet',
+      unitPrice: 9.0,
+      costPrice: 7.0,
+      stockQty: 35,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Drinks',
+    ),
+    Product(
+      productId: 'seed_pos_13',
+      name: 'C2 Green Tea 230 ml',
+      unitPrice: 20.0,
+      costPrice: 16.0,
+      stockQty: 23,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Drinks',
+    ),
+    Product(
+      productId: 'seed_pos_14',
+      name: 'Chippy BBQ',
+      unitPrice: 10.0,
+      costPrice: 8.0,
+      stockQty: 39,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Snacks',
+    ),
+    Product(
+      productId: 'seed_pos_15',
+      name: 'Oishi Prawn Crackers',
+      unitPrice: 12.0,
+      costPrice: 9.5,
+      stockQty: 22,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Snacks',
+    ),
+    Product(
+      productId: 'seed_pos_16',
+      name: 'Ligo Sardinas',
+      unitPrice: 24.0,
+      costPrice: 20.0,
+      stockQty: 16,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Canned',
+    ),
+    Product(
+      productId: 'seed_pos_17',
+      name: 'Century Tuna Flakes',
+      unitPrice: 38.0,
+      costPrice: 30.0,
+      stockQty: 12,
+      threshold: 6,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Canned',
+      barcode: '4800016004315',
+    ),
+    Product(
+      productId: 'seed_pos_18',
+      name: 'Silver Swan Toyo',
+      unitPrice: 18.0,
+      costPrice: 14.0,
+      stockQty: 18,
+      threshold: 8,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Cooking',
+      barcode: '4800016004316',
+    ),
+    Product(
+      productId: 'seed_pos_19',
+      name: 'Datu Puti Suka',
+      unitPrice: 18.0,
+      costPrice: 14.0,
+      stockQty: 14,
+      threshold: 8,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Cooking',
+    ),
+    Product(
+      productId: 'seed_pos_20',
+      name: 'Asin (Iodized)',
+      unitPrice: 10.0,
+      costPrice: 7.0,
+      stockQty: 30,
+      threshold: 10,
+      isActive: true,
+      createdAt: DateTime(2026),
+      updatedAt: DateTime(2026),
+      categoryName: 'Cooking',
+    ),
+  ];
+
+  static IconData _getCategoryIcon(String? catName, String pName) {
+    final String c = (catName ?? '').toLowerCase();
+    final String p = pName.toLowerCase();
+    if (c.contains('noodle') || p.contains('noodle') || p.contains('canton')) {
+      return Icons.ramen_dining_outlined;
+    }
+    if (c.contains('drink') ||
+        c.contains('beverage') ||
+        p.contains('kopiko') ||
+        p.contains('coke') ||
+        p.contains('milo') ||
+        p.contains('tea')) {
+      return Icons.local_drink_outlined;
+    }
+    if (c.contains('snack') ||
+        p.contains('piattos') ||
+        p.contains('chippy') ||
+        p.contains('oishi') ||
+        p.contains('cracker')) {
+      return Icons.cookie_outlined;
+    }
+    if (c.contains('fresh') || c.contains('egg') || p.contains('itlog')) {
+      return Icons.egg_outlined;
+    }
+    if (c.contains('rice') || c.contains('grain') || p.contains('bigas')) {
+      return Icons.grain_outlined;
+    }
+    if (c.contains('home') ||
+        c.contains('soap') ||
+        p.contains('safeguard') ||
+        p.contains('surf') ||
+        p.contains('colgate')) {
+      return Icons.cleaning_services_outlined;
+    }
+    if (c.contains('canned') || p.contains('sardinas') || p.contains('tuna')) {
+      return Icons.inventory_2_outlined;
+    }
+    if (c.contains('cook') ||
+        c.contains('condiment') ||
+        p.contains('toyo') ||
+        p.contains('suka') ||
+        p.contains('asin') ||
+        p.contains('mang tomas') ||
+        p.contains('oil')) {
+      return Icons.soup_kitchen_outlined;
+    }
+    return Icons.shopping_bag_outlined;
+  }
 
   @override
   void dispose() {
@@ -48,6 +359,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     showDialog<void>(
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         icon: Icon(Icons.warning_amber_rounded,
             color: appColors(ctx).warning, size: 36),
         title: const Text('Not enough stock'),
@@ -71,6 +384,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     final bool? confirmed = await showDialog<bool>(
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         icon: Icon(Icons.remove_shopping_cart_outlined,
             color: appColors(ctx).warning, size: 36),
         title: const Text('Remove Item?'),
@@ -118,12 +433,22 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     final List<String> staticKeys = <String>[
       'qr_gcash',
       'qr_maya',
-      'qr_maribank'
+      'qr_bdo',
+      'qr_bpi',
+      'qr_gotyme',
+      'qr_unionbank',
+      'qr_maribank',
+      'qr_custom',
     ];
     final Map<String, String> staticLabels = <String, String>{
       'qr_gcash': 'GCash',
       'qr_maya': 'Maya',
+      'qr_bdo': 'BDO',
+      'qr_bpi': 'BPI',
+      'qr_gotyme': 'GoTyme',
+      'qr_unionbank': 'UnionBank',
       'qr_maribank': 'MariBank',
+      'qr_custom': 'Bangko QR',
     };
     // Dynamic extras
     final int extraCount = prefs.getInt('qr_extra_count') ?? 0;
@@ -165,6 +490,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
                 : 0;
 
             return AlertDialog(
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
               title: const Text('Checkout'),
               content: SingleChildScrollView(
                 child: Column(
@@ -392,6 +719,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
                       await showDialog<void>(
                         context: ctx,
                         builder: (BuildContext dCtx) => AlertDialog(
+                          backgroundColor: Colors.white,
+                          surfaceTintColor: Colors.transparent,
                           icon: Icon(Icons.qr_code_2,
                               color: appColors(dCtx).warning, size: 36),
                           title: const Text('No Payment QR Set Up'),
@@ -413,16 +742,16 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
                     ref.read(cartProvider.notifier).setPaymentMethod(method);
                     // When ewallet is selected, store the specific provider label
                     if (method == 'ewallet' && selectedQrKey != null) {
-                      final Map<String, String?>? entry = qrEntries
-                          .cast<Map<String, String?>?>()
-                          .firstWhere(
-                            (Map<String, String?>? e) =>
-                                e!['key'] == selectedQrKey,
-                            orElse: () => null,
-                          );
+                      final Map<String, String?>? entry =
+                          qrEntries.cast<Map<String, String?>?>().firstWhere(
+                                (Map<String, String?>? e) =>
+                                    e!['key'] == selectedQrKey,
+                                orElse: () => null,
+                              );
                       if (entry != null && entry['label'] != null) {
-                        ref.read(cartProvider.notifier).setPaymentMethod(
-                            'ewallet:${entry['label']}');
+                        ref
+                            .read(cartProvider.notifier)
+                            .setPaymentMethod('ewallet:${entry['label']}');
                       }
                     }
                     if (mobileCtrl.text.isNotEmpty) {
@@ -525,7 +854,9 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'Receipt #${receipt.receiptId.substring(0, 8).toUpperCase()}',
+                        receipt.receiptId.startsWith('REF-')
+                            ? receipt.receiptId
+                            : 'Receipt #${receipt.receiptId.substring(0, 8).toUpperCase()}',
                         style: const TextStyle(
                             color: Colors.white70, fontSize: 12),
                       ),
@@ -676,7 +1007,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-  
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
@@ -702,8 +1032,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     );
   }
 
-
-
   // Scan barcode → find product by barcode → add to cart directly
   Future<void> _scanAndAdd() async {
     final String? barcode = await Navigator.of(context).push<String>(
@@ -720,7 +1048,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
           'Na-scan ang Buyer Order #${order.orderId} (${order.totalItemCount} items, ₱${order.totalAmount.toStringAsFixed(2)})!',
         );
         setState(() {
-          _showSearch = false;
           _searchCtrl.clear();
         });
         return;
@@ -747,7 +1074,6 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     }
     notifier.search(''); // clear search results
     setState(() {
-      _showSearch = false;
       _searchCtrl.clear();
     });
   }
@@ -756,7 +1082,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
 
   Future<void> _aiScan() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+    final XFile? image =
+        await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
     if (image == null || !mounted) return;
 
     // Show loading overlay
@@ -771,7 +1098,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
       final base64Image = base64Encode(bytes);
 
       final response = await http.post(
-        Uri.parse('https://serverless.roboflow.com/ryz-q9ol8/workflows/detect-count-and-visualize-3'),
+        Uri.parse(
+            'https://serverless.roboflow.com/ryz-q9ol8/workflows/detect-count-and-visualize-3'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "api_key": "eqU5uR0sdzhRaTHf49yJ",
@@ -788,7 +1116,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
         final data = jsonDecode(response.body);
         _handleRoboflowResponse(data);
       } else {
-        _showMessage('AI Scan failed: ${response.statusCode} - ${response.body}');
+        _showMessage(
+            'AI Scan failed: ${response.statusCode} - ${response.body}');
       }
     } catch (e) {
       if (mounted) {
@@ -830,7 +1159,8 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     });
 
     final String? detectedClass = predictions.first['class']?.toString();
-    final double confidence = (predictions.first['confidence'] as num?)?.toDouble() ?? 0.0;
+    final double confidence =
+        (predictions.first['confidence'] as num?)?.toDouble() ?? 0.0;
 
     if (detectedClass == null || detectedClass.isEmpty) {
       _showMessage('AI could not identify the product.');
@@ -845,20 +1175,23 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     // Search the local inventory for a matching product name
     await notifier.search(detectedClass);
     final List<Product> results = ref.read(cartProvider).searchResults;
-    
+
     if (!mounted) return;
 
     if (results.isEmpty) {
-      _showMessage('AI detected "$detectedClass" (${(confidence*100).toStringAsFixed(1)}%), but it is not in your inventory.');
+      _showMessage(
+          'AI detected "$detectedClass" (${(confidence * 100).toStringAsFixed(1)}%), but it is not in your inventory.');
       notifier.search('');
     } else {
       final Product p = results.first;
       showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-          icon: const Icon(Icons.auto_awesome, color: Colors.blueAccent, size: 36),
+          icon: const Icon(Icons.auto_awesome,
+              color: Colors.blueAccent, size: 36),
           title: const Text('AI Match Found'),
-          content: Text('AI detected: $detectedClass\nConfidence: ${(confidence*100).toStringAsFixed(1)}%\n\nAdd "${p.name}" to cart?'),
+          content: Text(
+              'AI detected: $detectedClass\nConfidence: ${(confidence * 100).toStringAsFixed(1)}%\n\nAdd "${p.name}" to cart?'),
           actions: [
             TextButton(
               onPressed: () {
@@ -894,427 +1227,923 @@ class _ScannerScreenState extends ConsumerState<ScannerScreen> {
     }
   }
 
-  // ─── Build ────────────────────────────────────────────────────────────────
+  // ─── Cart Review Bottom Sheet ─────────────────────────────────────────────
+
+  void _showCartDetailsSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (BuildContext sheetCtx) {
+        return Consumer(
+          builder: (BuildContext ctx, WidgetRef refWatcher, _) {
+            final CartState currentCart = refWatcher.watch(cartProvider);
+            if (currentCart.isEmpty) {
+              Navigator.pop(sheetCtx);
+              return const SizedBox.shrink();
+            }
+            final AppColors c = appColors(ctx);
+            final int totalItemsCount = currentCart.items
+                .fold<int>(0, (int s, CartItem i) => s + i.qty);
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        const Icon(Icons.shopping_bag_outlined,
+                            color: Color(0xFFA31D1D), size: 24),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Cart ($totalItemsCount item${totalItemsCount == 1 ? '' : 's'})',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                          ),
+                        ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () {
+                            ref.read(cartProvider.notifier).clearCart();
+                            Navigator.pop(sheetCtx);
+                          },
+                          child: const Text('I-clear',
+                              style: TextStyle(color: Colors.red)),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(sheetCtx),
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(ctx).size.height * 0.45,
+                      ),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        itemCount: currentCart.items.length,
+                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        itemBuilder: (BuildContext _, int index) {
+                          final CartItem item = currentCart.items[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: Row(
+                              children: <Widget>[
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Text(
+                                        item.product.name,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14),
+                                      ),
+                                      Text(
+                                        '₱${item.product.unitPrice.toStringAsFixed(2)} bawat isa',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            color: c.textSecondary),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  children: <Widget>[
+                                    IconButton(
+                                      icon: const Icon(
+                                          Icons.remove_circle_outline,
+                                          size: 20),
+                                      onPressed: () {
+                                        if (item.qty <= 1) {
+                                          _confirmRemoveItem(item.product.name,
+                                              item.product.productId);
+                                        } else {
+                                          ref
+                                              .read(cartProvider.notifier)
+                                              .changeQty(
+                                                  item.product.productId, -1);
+                                        }
+                                      },
+                                    ),
+                                    Text(
+                                      '${item.qty}',
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w800,
+                                          fontSize: 15),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.add_circle_outline,
+                                          size: 20),
+                                      onPressed: () {
+                                        final String? warn = ref
+                                            .read(cartProvider.notifier)
+                                            .changeQty(
+                                                item.product.productId, 1);
+                                        if (warn != null) {
+                                          _showStockWarning(item.product.name,
+                                              item.product.stockQty);
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  width: 75,
+                                  child: Text(
+                                    '₱${item.subtotal.toStringAsFixed(2)}',
+                                    textAlign: TextAlign.end,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFFA31D1D),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const Divider(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        const Text(
+                          'Kabuuan:',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w700),
+                        ),
+                        Text(
+                          '₱${currentCart.total.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFFA31D1D),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFA31D1D),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24)),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(sheetCtx);
+                          _showCheckoutDialog();
+                        },
+                        child: const Text(
+                          'Ituloy ang Bayaran',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+// ─── Build ────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final AppColors c = appColors(context);
     final CartState cart = ref.watch(cartProvider);
 
+    // Watch SQLite products from inventoryProvider, fallback to catalog if empty
+    final AsyncValue<InventoryState> invAsync = ref.watch(inventoryProvider);
+    final List<Product> dbProducts =
+        invAsync.value?.products ?? const <Product>[];
+    final List<Product> allProducts =
+        dbProducts.isNotEmpty ? dbProducts : _defaultFallbackProducts;
+
+    // Filter by selected category and search input
+    final String selectedCategory = _selectedCategory;
+    final String query = _searchCtrl.text.trim().toLowerCase();
+
+    final List<Product> displayProducts = allProducts.where((Product p) {
+      if (selectedCategory != 'Lahat') {
+        final String catName = (p.categoryName ?? '').toLowerCase();
+        final String pName = p.name.toLowerCase();
+        final String target = selectedCategory.toLowerCase();
+
+        bool matches = false;
+        if (target == 'noodles') {
+          matches = catName.contains('noodle') ||
+              pName.contains('noodle') ||
+              pName.contains('canton');
+        } else if (target == 'drinks') {
+          matches = catName.contains('drink') ||
+              catName.contains('beverage') ||
+              pName.contains('kopiko') ||
+              pName.contains('coke') ||
+              pName.contains('milo') ||
+              pName.contains('tea') ||
+              pName.contains('c2');
+        } else if (target == 'snacks') {
+          matches = catName.contains('snack') ||
+              pName.contains('piattos') ||
+              pName.contains('chippy') ||
+              pName.contains('oishi') ||
+              pName.contains('cracker') ||
+              pName.contains('tomas');
+        } else if (target == 'fresh') {
+          matches = catName.contains('fresh') ||
+              catName.contains('egg') ||
+              catName.contains('dairy') ||
+              pName.contains('itlog');
+        } else if (target == 'rice') {
+          matches = catName.contains('rice') ||
+              catName.contains('grain') ||
+              pName.contains('bigas');
+        } else if (target == 'home') {
+          matches = catName.contains('home') ||
+              catName.contains('personal') ||
+              pName.contains('safeguard') ||
+              pName.contains('surf') ||
+              pName.contains('colgate');
+        } else if (target == 'cooking') {
+          matches = catName.contains('cook') ||
+              catName.contains('condiment') ||
+              pName.contains('toyo') ||
+              pName.contains('suka') ||
+              pName.contains('asin') ||
+              pName.contains('oil') ||
+              pName.contains('tomas');
+        } else if (target == 'canned') {
+          matches = catName.contains('canned') ||
+              pName.contains('sardinas') ||
+              pName.contains('tuna');
+        } else {
+          matches = catName.contains(target) || pName.contains(target);
+        }
+        if (!matches) return false;
+      }
+
+      if (query.isNotEmpty) {
+        final bool matchName = p.name.toLowerCase().contains(query);
+        final bool matchBarcode =
+            (p.barcode ?? '').toLowerCase().contains(query);
+        final bool matchCat =
+            (p.categoryName ?? '').toLowerCase().contains(query);
+        if (!matchName && !matchBarcode && !matchCat) return false;
+      }
+
+      return true;
+    }).toList();
+
+    // Mapping of product ID to cart quantity for amber badges
+    final Map<String, int> inCartQuantities = <String, int>{
+      for (final CartItem item in cart.items) item.product.productId: item.qty,
+    };
+    final int totalCartItems =
+        cart.items.fold<int>(0, (int s, CartItem i) => s + i.qty);
+
     return Column(
       children: <Widget>[
-        // ── Scrollable content ──────────────────────────────────────────
-        Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                // Header row
-                Row(children: <Widget>[
-                  const Icon(Icons.point_of_sale_outlined),
-                  const SizedBox(width: 8),
-                  Text('POS', style: Theme.of(context).textTheme.titleLarge),
-                  const Spacer(),
-                  // Enlarged always-visible scan button
-                  ElevatedButton.icon(
-                    onPressed: _scanAndAdd,
-                    icon: const Icon(Icons.qr_code_scanner, size: 18),
-                    label: const Text('SCAN'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: c.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
+        // ── Top Header Controls (Search + Quick Actions + Category Chips) ──
+        Container(
+          color: c.surface,
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // ── 1. Seamless Blended Search Input ──────────────────────
+              Container(
+                height: 48,
+                decoration: BoxDecoration(
+                  color: c.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: c.border),
+                  boxShadow: const <BoxShadow>[
+                    BoxShadow(
+                      color: Color(0x0A000000),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
                     ),
-                  ),
-                  const SizedBox(width: 6),
-                  ElevatedButton.icon(
-                    onPressed: _aiScan,
-                    icon: const Icon(Icons.auto_awesome, size: 18),
-                    label: const Text('AI SCAN'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent.shade700,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  IconButton.filledTonal(
-                    onPressed: () => setState(() => _showSearch = !_showSearch),
-                    icon: Icon(_showSearch ? Icons.close : Icons.search,
-                        size: 18),
-                    tooltip: 'Search products',
-                  ),
-                ]),
-                const SizedBox(height: 10),
-
-                // Search bar + results
-                if (_showSearch) ...<Widget>[
-                  TextField(
-                    controller: _searchCtrl,
-                    autofocus: true,
-                    decoration: const InputDecoration(
-                      hintText: 'Search product by name or barcode...',
-                      prefixIcon: Icon(Icons.search),
-                    ),
-                    onChanged: (String v) =>
-                        ref.read(cartProvider.notifier).search(v),
-                  ),
-                  const SizedBox(height: 8),
-                  if (cart.searchResults.isNotEmpty)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: c.surface,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: c.border),
-                      ),
-                      child: Column(
-                        children: cart.searchResults
-                            .map((Product p) => ListTile(
-                                  title: Text(p.name),
-                                  subtitle: Text(
-                                      '${p.categoryName ?? 'Uncategorized'} | Stock: ${p.stockQty}'),
-                                  trailing: Text(
-                                    '₱${p.unitPrice.toStringAsFixed(2)}',
-                                    style: TextStyle(
-                                        color: c.primary,
-                                        fontWeight: FontWeight.w700),
-                                  ),
-                                  onTap: () {
-                                    final String? warn = ref
-                                        .read(cartProvider.notifier)
-                                        .addProduct(p);
-                                    if (warn != null) _showMessage(warn);
-                                    setState(() {
-                                      _showSearch = false;
-                                      _searchCtrl.clear();
-                                    });
-                                    ref.read(cartProvider.notifier).search('');
-                                  },
-                                ))
-                            .toList(),
+                  ],
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                child: Row(
+                  children: <Widget>[
+                    Icon(Icons.search, color: c.textSecondary, size: 22),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchCtrl,
+                        style: TextStyle(color: c.text),
+                        decoration: InputDecoration(
+                          hintText: 'Hanapin ang produkto',
+                          hintStyle: TextStyle(
+                            color: c.textTertiary,
+                            fontSize: 14,
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        onChanged: (_) => setState(() {}),
                       ),
                     ),
-                  const SizedBox(height: 12),
-                ],
+                    if (_searchCtrl.text.isNotEmpty)
+                      GestureDetector(
+                        onTap: () {
+                          _searchCtrl.clear();
+                          setState(() {});
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Icon(Icons.clear,
+                              size: 18, color: c.textSecondary),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
 
-                // Cart items — empty state shows big SCAN button
-                if (cart.isEmpty && !_showSearch)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Column(children: <Widget>[
-                      // Primary CTA: big scan button
-                      InkWell(
+              // ── 2. Scan & AI Scan Highlight Blocks (Side-by-Side Cards) ──
+              Row(
+                children: <Widget>[
+                  // Block 1: Barcode Scanner (Full SARI Red Card with Shadow)
+                  Expanded(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
                         onTap: _scanAndAdd,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16),
                         child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 36),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: <Color>[
-                                c.primary,
-                                c.primary.withValues(alpha: 0.75),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: <BoxShadow>[
+                            color: c.primary,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: const <BoxShadow>[
                               BoxShadow(
-                                color: c.primary.withValues(alpha: 0.35),
-                                blurRadius: 16,
-                                offset: const Offset(0, 6),
+                                color: Color(0x33D62828),
+                                blurRadius: 8,
+                                offset: Offset(0, 3),
                               ),
                             ],
                           ),
-                          child: Column(children: <Widget>[
-                            const Icon(Icons.qr_code_scanner,
-                                size: 64, color: Colors.white),
-                            const SizedBox(height: 12),
-                            const Text(
-                              'Tap to Scan Barcode',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 18,
+                          child: const Row(
+                            children: <Widget>[
+                              Icon(Icons.qr_code_scanner,
+                                  color: Colors.white, size: 22),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text(
+                                      'Barcode Scan',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    Text(
+                                      'I-scan ang paninda',
+                                      style: TextStyle(
+                                        color: Color(0xFFFDE8E8),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Point camera at product barcode',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.8),
-                                fontSize: 13,
-                              ),
-                            ),
-                          ]),
+                            ],
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'or use 🔍 Search above',
-                        style: TextStyle(color: c.textTertiary, fontSize: 12),
-                      ),
-                    ]),
-                  )
-                else if (cart.isEmpty) // search open, nothing in cart
-                  const SizedBox(height: 8)
-                else
-                  ...cart.items.map((CartItem item) {
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
-                        child: Row(children: <Widget>[
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(item.product.name,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w600)),
-                                Text(
-                                  '₱${item.product.unitPrice.toStringAsFixed(2)} each',
-                                  style: TextStyle(
-                                      color: c.textSecondary, fontSize: 12),
-                                ),
-                              ],
-                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+
+                  // Block 2: AI Vision Scan (White Card with Red Border & Shadow)
+                  Expanded(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: _aiScan,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: c.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: c.primary, width: 1.5),
+                            boxShadow: const <BoxShadow>[
+                              BoxShadow(
+                                color: Color(0x10000000),
+                                blurRadius: 8,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
                           ),
-                          Row(children: <Widget>[
-                            IconButton(
-                              onPressed: () {
-                                // If qty is already 1, confirm before removing
-                                if (item.qty <= 1) {
-                                  _confirmRemoveItem(
-                                      item.product.name, item.product.productId);
-                                  return;
-                                }
-                                final String? warn = ref
-                                    .read(cartProvider.notifier)
-                                    .changeQty(item.product.productId, -1);
-                                if (warn != null) _showMessage(warn);
-                              },
-                              icon: const Icon(Icons.remove_circle_outline),
-                              iconSize: 20,
-                            ),
-                            // Tap qty number to edit manually
-                            GestureDetector(
-                              onTap: () async {
-                                final TextEditingController qtyCtrl =
-                                    TextEditingController(text: '${item.qty}');
-                                final String? result = await showDialog<String>(
-                                  context: context,
-                                  builder: (BuildContext dCtx) => AlertDialog(
-                                    title: Text(item.product.name),
-                                    content: TextField(
-                                      controller: qtyCtrl,
-                                      autofocus: true,
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: <TextInputFormatter>[
-                                        FilteringTextInputFormatter.digitsOnly,
-                                      ],
-                                      decoration: const InputDecoration(
-                                          labelText: 'Quantity'),
-                                    ),
-                                    actions: <Widget>[
-                                      TextButton(
-                                          onPressed: () => Navigator.pop(dCtx),
-                                          child: const Text('Cancel')),
-                                      ElevatedButton(
-                                          onPressed: () =>
-                                              Navigator.pop(dCtx, qtyCtrl.text),
-                                          child: const Text('Set')),
-                                    ],
-                                  ),
-                                );
-                                if (result != null) {
-                                  final int? newQty = int.tryParse(result);
-                                  if (newQty != null && newQty > 0) {
-                                    if (newQty > item.product.stockQty) {
-                                      _showStockWarning(
-                                        item.product.name,
-                                        item.product.stockQty,
-                                      );
-                                    } else {
-                                      final int delta = newQty - item.qty;
-                                      final String? warn = ref
-                                          .read(cartProvider.notifier)
-                                          .changeQty(
-                                              item.product.productId, delta);
-                                      if (warn != null) {
-                                        _showStockWarning(
-                                          item.product.name,
-                                          item.product.stockQty,
-                                        );
-                                      }
-                                    }
-                                  } else if (newQty == 0) {
-                                    _confirmRemoveItem(
-                                        item.product.name,
-                                        item.product.productId);
-                                  } else if (newQty != null && newQty < 0) {
-                                    showDialog<void>(
-                                      context: context,
-                                      builder: (BuildContext dCtx) => AlertDialog(
-                                        icon: Icon(Icons.error_outline,
-                                            color: appColors(dCtx).error, size: 36),
-                                        title: const Text('Invalid Quantity'),
-                                        content: const Text(
-                                            'Quantity cannot be negative.'),
-                                        actions: <Widget>[
-                                          ElevatedButton(
-                                            onPressed: () => Navigator.pop(dCtx),
-                                            child: const Text('OK'),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: c.surfaceMuted,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(color: c.border),
+                          child: Row(
+                            children: <Widget>[
+                              Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFD62828),
+                                  shape: BoxShape.circle,
                                 ),
-                                child: Text(
-                                  '${item.qty}',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 15),
+                                child: const Icon(Icons.auto_awesome,
+                                    color: Colors.white, size: 14),
+                              ),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    Text(
+                                      'AI Scan',
+                                      style: TextStyle(
+                                        color: Color(0xFFD62828),
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Visual recognition',
+                                      style: TextStyle(
+                                        color: Colors.black54,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                final String? warn = ref
-                                    .read(cartProvider.notifier)
-                                    .changeQty(item.product.productId, 1);
-                                if (warn != null) {
-                                  _showStockWarning(
-                                    item.product.name,
-                                    item.product.stockQty,
-                                  );
-                                }
-                              },
-                              icon: const Icon(Icons.add_circle_outline),
-                              iconSize: 20,
-                            ),
-                          ]),
-                          SizedBox(
-                            width: 80,
-                            child: Text(
-                              '₱${item.subtotal.toStringAsFixed(2)}',
-                              textAlign: TextAlign.end,
-                              style: TextStyle(
-                                  color: c.primary,
-                                  fontWeight: FontWeight.w700),
-                            ),
+                            ],
                           ),
-                        ]),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // ── 3. Horizontal Category Chips Row (Swipe Right) ───────────
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _categories.map((String cat) {
+                    final bool isSel = _selectedCategory == cat;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 6),
+                      child: InkWell(
+                        onTap: () => setState(() => _selectedCategory = cat),
+                        borderRadius: BorderRadius.circular(16),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 7),
+                          decoration: BoxDecoration(
+                            color: isSel ? c.primary : c.surface,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSel ? c.primary : c.borderSubtle,
+                              width: 1,
+                            ),
+                            boxShadow: isSel
+                                ? const <BoxShadow>[
+                                    BoxShadow(
+                                      color: Color(0x33D62828),
+                                      blurRadius: 4,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              if (isSel) ...<Widget>[
+                                const Icon(Icons.check,
+                                    size: 13, color: Colors.white),
+                                const SizedBox(width: 4),
+                              ],
+                              Text(
+                                cat,
+                                style: TextStyle(
+                                  color: isSel ? Colors.white : c.text,
+                                  fontWeight:
+                                      isSel ? FontWeight.w800 : FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     );
-                  }),
-              ],
-            ),
-          ),
-        ),
-
-        // ── Sticky checkout bar ─────────────────────────────────────────
-        Container(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
-          decoration: BoxDecoration(
-            color: c.surface,
-            border: Border(top: BorderSide(color: c.border)),
-            boxShadow: <BoxShadow>[
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.06),
-                blurRadius: 8,
-                offset: const Offset(0, -2),
+                  }).toList(),
+                ),
               ),
             ],
           ),
-          child: Row(children: <Widget>[
-            // Total info
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text('Total',
-                    style: TextStyle(color: c.textSecondary, fontSize: 11)),
-                Text(
-                  '₱${cart.total.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    color: c.primary,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 22,
+        ),
+
+        // ── Main Content: Responsive Product Blocks Grid ───────────────────
+        Expanded(
+          child: displayProducts.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(Icons.inventory_2_outlined,
+                          size: 48, color: c.textTertiary),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Walang produktong tumugma sa "$_selectedCategory"',
+                        style: TextStyle(
+                            color: c.textSecondary,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
+                )
+              : LayoutBuilder(
+                  builder: (BuildContext ctx, BoxConstraints constraints) {
+                    final double width = constraints.maxWidth;
+                    final int crossAxisCount =
+                        width >= 720 ? 4 : (width >= 480 ? 3 : 2);
+                    final double aspectRatio =
+                        width >= 720 ? 0.88 : (width >= 480 ? 0.86 : 0.84);
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.fromLTRB(14, 8, 14, 16),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: aspectRatio,
+                      ),
+                      itemCount: displayProducts.length,
+                      itemBuilder: (BuildContext _, int index) {
+                        final Product p = displayProducts[index];
+                        final int inCartQty =
+                            inCartQuantities[p.productId] ?? 0;
+                        final IconData catIcon =
+                            _getCategoryIcon(p.categoryName, p.name);
+
+                        return Material(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(18),
+                          child: InkWell(
+                            onTap: () {
+                              HapticFeedback.lightImpact();
+                              final String? warn =
+                                  ref.read(cartProvider.notifier).addProduct(p);
+                              if (warn != null) {
+                                _showStockWarning(p.name, p.stockQty);
+                              }
+                            },
+                            borderRadius: BorderRadius.circular(18),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(18),
+                                border: Border.all(
+                                  color: inCartQty > 0
+                                      ? const Color(0xFFE5A93C)
+                                      : const Color(0xFFECE7E2),
+                                  width: inCartQty > 0 ? 1.5 : 1,
+                                ),
+                                boxShadow: <BoxShadow>[
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.03),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  // Top row: Category Icon + In-Cart Quantity Amber Badge
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      Icon(
+                                        catIcon,
+                                        size: 22,
+                                        color: const Color(0xFFA31D1D),
+                                      ),
+                                      if (inCartQty > 0)
+                                        Container(
+                                          width: 22,
+                                          height: 22,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFE5A93C),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '$inCartQty',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      else
+                                        const SizedBox(height: 22),
+                                    ],
+                                  ),
+                                  const Spacer(),
+                                  // Product name (bold, max 2 lines)
+                                  Text(
+                                    p.name,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13,
+                                      height: 1.18,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  // Price in bold red
+                                  Text(
+                                    '₱${p.unitPrice.toStringAsFixed(p.unitPrice.truncateToDouble() == p.unitPrice ? 0 : 2)}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 16,
+                                      color: Color(0xFFA31D1D),
+                                      height: 1.1,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  // Stock indicator (red Natitira if low stock)
+                                  p.isLowStock
+                                      ? Text(
+                                          'Natitira ${p.stockQty}',
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.w700,
+                                            color: Color(0xFFA31D1D),
+                                          ),
+                                        )
+                                      : Text(
+                                          'Stock ${p.stockQty}',
+                                          style: const TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  '${cart.items.length} item${cart.items.length == 1 ? '' : 's'}',
-                  style: TextStyle(color: c.textSecondary, fontSize: 10),
-                ),
-              ],
-            ),
-            const Spacer(),
-            // Clear
-            if (!cart.isEmpty)
-              TextButton(
-                onPressed: ref.read(cartProvider.notifier).clearCart,
-                style: TextButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                ),
-                child: Text('Clear',
-                    style: TextStyle(color: c.error, fontSize: 13)),
+        ),
+
+        // ── Sticky Checkout Dock (Matches Image 1) ─────────────────────────
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            boxShadow: <BoxShadow>[
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.08),
+                blurRadius: 12,
+                offset: const Offset(0, -3),
               ),
-            const SizedBox(width: 4),
-            // Checkout
-            SizedBox(
-              height: 44,
-              child: ElevatedButton(
-                onPressed: cart.isProcessing ? null : _showCheckoutDialog,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: c.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
+            ],
+          ),
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              // Offline notice banner (dismissible)
+              if (!_hideOfflineNotice) ...<Widget>[
+                Row(
+                  children: <Widget>[
+                    const Icon(Icons.error_outline,
+                        size: 14, color: Color(0xFFA31D1D)),
+                    const SizedBox(width: 6),
+                    const Expanded(
+                      child: Text(
+                        'Sa device na ito naka-save ang mga benta',
+                        style: TextStyle(fontSize: 11, color: Colors.black87),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => setState(() => _hideOfflineNotice = true),
+                      child: const Text(
+                        'Alisin',
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.black54,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
                 ),
-                child: cart.isProcessing
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
-                    : const Row(
+                const SizedBox(height: 8),
+              ],
+
+              // Segmented payment buttons (Cash, GCash, Utang)
+              Row(
+                children: <Widget>[
+                  _buildPaymentPill('Cash', 'cash', cart.paymentMethod),
+                  const SizedBox(width: 8),
+                  _buildPaymentPill('GCash', 'gcash', cart.paymentMethod),
+                  const SizedBox(width: 8),
+                  _buildPaymentPill('Utang', 'utang', cart.paymentMethod),
+                ],
+              ),
+              const SizedBox(height: 10),
+
+              // Summary row: Item count + Total + Bayaran button
+              Row(
+                children: <Widget>[
+                  // Cart items & big total (tap to view cart details)
+                  InkWell(
+                    onTap: cart.isEmpty
+                        ? null
+                        : () => _showCartDetailsSheet(context),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 4, vertical: 2),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
-                          Icon(Icons.shopping_cart_checkout, size: 18),
-                          SizedBox(width: 8),
-                          Text('Checkout',
-                              style: TextStyle(fontWeight: FontWeight.w700)),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text(
+                                '$totalCartItems item',
+                                style: const TextStyle(
+                                    fontSize: 11, color: Colors.black54),
+                              ),
+                              if (!cart.isEmpty) ...<Widget>[
+                                const SizedBox(width: 4),
+                                const Icon(Icons.keyboard_arrow_up,
+                                    size: 14, color: Colors.black54),
+                              ],
+                            ],
+                          ),
+                          Text(
+                            '₱${cart.total.toStringAsFixed(cart.total.truncateToDouble() == cart.total ? 0 : 2)}',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.black87,
+                              height: 1.1,
+                            ),
+                          ),
                         ],
                       ),
+                    ),
+                  ),
+                  const Spacer(),
+                  // Clear cart button if cart has items
+                  if (!cart.isEmpty)
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline, size: 20),
+                      color: Colors.black45,
+                      tooltip: 'Clear Cart',
+                      onPressed: () =>
+                          ref.read(cartProvider.notifier).clearCart(),
+                    ),
+                  const SizedBox(width: 4),
+                  // Solid Red Bayaran Pill Button
+                  SizedBox(
+                    height: 48,
+                    child: ElevatedButton(
+                      onPressed: cart.isEmpty || cart.isProcessing
+                          ? null
+                          : _showCheckoutDialog,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFA31D1D),
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: Colors.grey.shade300,
+                        disabledForegroundColor: Colors.grey.shade500,
+                        elevation: 0,
+                        padding: const EdgeInsets.symmetric(horizontal: 28),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                      ),
+                      child: cart.isProcessing
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Text(
+                              'Bayaran',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
       ],
+    );
+  }
+
+  Widget _buildPaymentPill(String label, String key, String currentMethod) {
+    final bool isSelected = currentMethod.toLowerCase() == key.toLowerCase();
+    return Expanded(
+      child: InkWell(
+        onTap: () {
+          ref.read(cartProvider.notifier).setPaymentMethod(key);
+        },
+        borderRadius: BorderRadius.circular(20),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 150),
+          padding: const EdgeInsets.symmetric(vertical: 9),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFFD62828) : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: isSelected
+                  ? const Color(0xFFD62828)
+                  : const Color(0xFFDDD5CE),
+              width: 1.5,
+            ),
+            boxShadow: isSelected
+                ? const <BoxShadow>[
+                    BoxShadow(
+                      color: Color(0x33D62828),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (isSelected) ...<Widget>[
+                const Icon(Icons.check, size: 14, color: Colors.white),
+                const SizedBox(width: 4),
+              ],
+              Text(
+                label,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black87,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -1344,7 +2173,7 @@ class _PaymentChip extends StatelessWidget {
     final Color fgColor = disabled
         ? c.textTertiary
         : selected
-            ? c.primary
+            ? Colors.white
             : c.textSecondary;
     return Tooltip(
       message: disabled ? (disabledHint ?? '') : '',
@@ -1357,16 +2186,25 @@ class _PaymentChip extends StatelessWidget {
             color: disabled
                 ? c.surfaceMuted.withValues(alpha: 0.5)
                 : selected
-                    ? c.primary.withValues(alpha: 0.15)
+                    ? const Color(0xFFD62828)
                     : c.surfaceMuted,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
                 color: disabled
                     ? c.borderSubtle
                     : selected
-                        ? c.primary
+                        ? const Color(0xFFD62828)
                         : c.border,
                 width: selected && !disabled ? 2 : 1),
+            boxShadow: selected && !disabled
+                ? const <BoxShadow>[
+                    BoxShadow(
+                      color: Color(0x33D62828),
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
           child: Column(children: <Widget>[
             Icon(icon, color: fgColor),
@@ -1375,9 +2213,8 @@ class _PaymentChip extends StatelessWidget {
               label,
               style: TextStyle(
                 color: fgColor,
-                fontWeight: selected && !disabled
-                    ? FontWeight.w700
-                    : FontWeight.w500,
+                fontWeight:
+                    selected && !disabled ? FontWeight.w700 : FontWeight.w500,
                 fontSize: 12,
               ),
             ),

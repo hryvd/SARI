@@ -11,11 +11,11 @@ import '../theme/store_theme.dart';
 
 // ─── Setup flow mode ────────────────────────────────────────────────────────
 enum _SetupMode {
-  landing,       // Step 0: choose Google or Offline
-  storeType,     // Step 1: pick store type (NEW — persists to SharedPreferences)
-  googleNew,     // Step 2a: Google OK, new store → enter name + PIN
-  googleExisting,// Step 2b: Google OK, existing store → enter PIN only
-  offline,       // Step 2c: local-only → enter name + PIN
+  landing, // Step 0: choose Google or Offline
+  storeType, // Step 1: pick store type (NEW — persists to SharedPreferences)
+  googleNew, // Step 2a: Google OK, new store → enter name + PIN
+  googleExisting, // Step 2b: Google OK, existing store → enter PIN only
+  offline, // Step 2c: local-only → enter name + PIN
 }
 
 class SetupScreen extends ConsumerStatefulWidget {
@@ -33,7 +33,8 @@ class _SetupScreenState extends ConsumerState<SetupScreen>
   GoogleLinkResult? _googleResult; // set after a successful Google Sign-In
   bool _isResettingPin =
       false; // true when user taps "Forgot PIN?" on existing store
-  StoreType _selectedStoreType = StoreType.sariSari; // chosen in store-type step
+  StoreType _selectedStoreType =
+      StoreType.sariSari; // chosen in store-type step
 
   // Form fields
   final TextEditingController _nameCtrl = TextEditingController();
@@ -333,87 +334,117 @@ class _SetupScreenState extends ConsumerState<SetupScreen>
   Widget _buildLanding(AppColors c) {
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 48),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            // Logo
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Image.asset(
-                'assets/images/sare_logo.png',
-                width: 96,
-                height: 96,
-                fit: BoxFit.contain,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 440),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                width: 76,
+                height: 76,
+                decoration: BoxDecoration(
+                  color: c.surface,
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: c.borderSubtle),
+                ),
+                padding: const EdgeInsets.all(10),
+                child: Image.asset('assets/images/sare_logo.png',
+                    fit: BoxFit.contain),
               ),
-            ),
-            const SizedBox(height: 24),
-            Text('Welcome to Sar-E',
-                style: TextStyle(
-                    fontSize: 28, fontWeight: FontWeight.w800, color: c.text)),
-            const SizedBox(height: 8),
-            Text(
-              'Set up your point-of-sale in seconds.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: c.textSecondary, fontSize: 15),
-            ),
-            const SizedBox(height: 48),
-
-            // Google Sign-In button
-            if (_isLoading)
-              const CircularProgressIndicator()
-            else ...<Widget>[
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _handleGoogleSignIn,
-                  icon: const _GoogleIcon(),
-                  label: const Text('Continue with Google'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black87,
-                    elevation: 2,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                    textStyle: const TextStyle(
-                        fontSize: 15, fontWeight: FontWeight.w600),
+              const SizedBox(height: 28),
+              Text(
+                'Welcome to SARI',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Set up your store and start your day with a clear view of what matters.',
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyLarge
+                    ?.copyWith(color: c.textSecondary),
+              ),
+              const SizedBox(height: 36),
+              if (_isLoading)
+                SizedBox(
+                  height: 116,
+                  child: Center(
+                    child: CircularProgressIndicator(color: c.primary),
+                  ),
+                )
+              else ...<Widget>[
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: ElevatedButton.icon(
+                    onPressed: _handleGoogleSignIn,
+                    icon: const _GoogleIcon(),
+                    label: const Text('Continue with Google'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: c.surface,
+                      foregroundColor: c.text,
+                      elevation: 0,
+                      side: BorderSide(color: c.border),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: _goOffline,
-                  icon: const Icon(Icons.wifi_off_rounded),
-                  label: const Text('Continue without account'),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: c.border),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14)),
-                    textStyle: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w500),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: OutlinedButton.icon(
+                    onPressed: _goOffline,
+                    icon: const Icon(Icons.wifi_off_rounded),
+                    label: const Text('Continue without account'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: c.primary,
+                      side:
+                          BorderSide(color: c.primary.withValues(alpha: 0.55)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      textStyle: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
                 ),
+              ],
+              if (_error != null) ...<Widget>[
+                const SizedBox(height: 16),
+                Text(
+                  _error!,
+                  style: TextStyle(color: c.error, fontSize: 13),
+                ),
+              ],
+              const SizedBox(height: 24),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Icon(Icons.lock_outline_rounded,
+                      size: 16, color: c.textTertiary),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Google enables backup and multi-device sync. Offline setup keeps data on this device.',
+                      style: TextStyle(color: c.textTertiary, fontSize: 12),
+                    ),
+                  ),
+                ],
               ),
             ],
-
-            if (_error != null) ...<Widget>[
-              const SizedBox(height: 16),
-              Text(_error!,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: c.error, fontSize: 13)),
-            ],
-
-            const SizedBox(height: 32),
-            Text(
-              'Google accounts enable cloud backup & multi-device sync.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: c.textTertiary, fontSize: 12),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -621,9 +652,8 @@ class _SetupScreenState extends ConsumerState<SetupScreen>
                     duration: const Duration(milliseconds: 180),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: selected
-                          ? brand.withValues(alpha: 0.14)
-                          : c.surface,
+                      color:
+                          selected ? brand.withValues(alpha: 0.14) : c.surface,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: selected ? brand : c.border,

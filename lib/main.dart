@@ -1,4 +1,3 @@
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,7 +7,7 @@ import 'screens/login_screen.dart';
 import 'screens/main_shell.dart';
 import 'screens/setup_screen.dart';
 import 'theme/app_theme.dart';
-// import 'firebase_options.dart';
+import 'application/locale_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,25 +17,23 @@ void main() async {
     debugPrint('Firebase initialization failed: $e\n'
         'Run `flutterfire configure` to generate firebase_options.dart.');
   }
-  runApp(const ProviderScope(child: SarEApp()));
+  runApp(const ProviderScope(child: SariApp()));
 }
 
-class SarEApp extends StatelessWidget {
-  const SarEApp({super.key});
+class SariApp extends ConsumerWidget {
+  const SariApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return DynamicColorBuilder(
-      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'SARI',
-          themeMode: ThemeMode.system,
-          theme: buildTheme(Brightness.light, dynamicScheme: lightDynamic),
-          darkTheme: buildTheme(Brightness.dark, dynamicScheme: darkDynamic),
-          home: const _AppEntry(),
-        );
-      },
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppLocale appLocale = ref.watch(localeProvider);
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'SARI',
+      locale: Locale(appLocale == AppLocale.en ? 'en' : 'fil'),
+      themeMode: ThemeMode.system,
+      theme: buildTheme(Brightness.light),
+      darkTheme: buildTheme(Brightness.dark),
+      home: const _AppEntry(),
     );
   }
 }
@@ -70,10 +67,8 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // SARI Emerald Brand Green
-    const Color brandGreen = Color(0xFF1E6E5A);
     return Scaffold(
-      backgroundColor: brandGreen,
+      backgroundColor: brandRed,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

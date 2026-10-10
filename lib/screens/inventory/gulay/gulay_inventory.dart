@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../domain/adapters/gulay_adapter.dart';
 import '../../../domain/entities/product.dart';
+import '../../../theme/app_theme.dart';
 import '../shared/inventory_header.dart';
 import '../shared/item_box_grid.dart';
 
@@ -61,21 +62,22 @@ class _GulayInventoryViewState extends State<GulayInventoryView> {
         TextEditingController(text: '2.0');
     final TextEditingController portionCtrl = TextEditingController();
     String selectedCat = adapter.defaultCategories.first;
+    final AppColors c = appColors(context);
 
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: const Color(0xFF1E2228),
+      backgroundColor: c.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       builder: (BuildContext ctx) {
         return Padding(
           padding: EdgeInsets.only(
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
             left: 20,
             right: 20,
-            top: 20,
+            top: 14,
           ),
           child: StatefulBuilder(
             builder: (BuildContext ctx, StateSetter setModalState) {
@@ -84,30 +86,61 @@ class _GulayInventoryViewState extends State<GulayInventoryView> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
+                    // Drag handle
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        margin: const EdgeInsets.only(bottom: 14),
+                        decoration: BoxDecoration(
+                          color: c.borderSubtle,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
-                        const Text(
-                          'Magdagdag ng Gulay / Prutas',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            'Magdagdag ng Gulay / Prutas',
+                            style: TextStyle(
+                              color: c.text,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white70),
+                          icon: Icon(Icons.close, color: c.textSecondary),
                           onPressed: () => Navigator.pop(ctx),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 14),
                     TextField(
                       controller: nameCtrl,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
+                      style: TextStyle(
+                        color: c.text,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      decoration: InputDecoration(
                         labelText: 'Pangalan ng Gulay / Ani',
+                        labelStyle: TextStyle(color: c.textSecondary, fontSize: 13),
                         hintText: 'e.g. Talong (Long Purple)',
+                        hintStyle: TextStyle(color: c.textTertiary, fontSize: 13),
+                        filled: true,
+                        fillColor: c.surfaceMuted,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: c.borderSubtle),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: adapter.brandColor, width: 1.5),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -117,10 +150,27 @@ class _GulayInventoryViewState extends State<GulayInventoryView> {
                           child: TextField(
                             controller: priceCtrl,
                             keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
+                            style: TextStyle(
+                              color: c.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: InputDecoration(
                               labelText: 'Presyo bawat Kilo (₱/kg)',
+                              labelStyle: TextStyle(color: c.textSecondary, fontSize: 13),
                               hintText: '75.00',
+                              hintStyle: TextStyle(color: c.textTertiary, fontSize: 13),
+                              filled: true,
+                              fillColor: c.surfaceMuted,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(color: c.borderSubtle),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(color: adapter.brandColor, width: 1.5),
+                              ),
                             ),
                           ),
                         ),
@@ -129,10 +179,27 @@ class _GulayInventoryViewState extends State<GulayInventoryView> {
                           child: TextField(
                             controller: stockCtrl,
                             keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
+                            style: TextStyle(
+                              color: c.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: InputDecoration(
                               labelText: 'Stock (Kilo)',
+                              labelStyle: TextStyle(color: c.textSecondary, fontSize: 13),
                               hintText: '10.5',
+                              hintStyle: TextStyle(color: c.textTertiary, fontSize: 13),
+                              filled: true,
+                              fillColor: c.surfaceMuted,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(color: c.borderSubtle),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(color: adapter.brandColor, width: 1.5),
+                              ),
                             ),
                           ),
                         ),
@@ -145,10 +212,27 @@ class _GulayInventoryViewState extends State<GulayInventoryView> {
                           child: TextField(
                             controller: lowStockCtrl,
                             keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
+                            style: TextStyle(
+                              color: c.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: InputDecoration(
                               labelText: 'Mababang Stock Alert (kg)',
+                              labelStyle: TextStyle(color: c.textSecondary, fontSize: 13),
                               hintText: '2.0',
+                              hintStyle: TextStyle(color: c.textTertiary, fontSize: 13),
+                              filled: true,
+                              fillColor: c.surfaceMuted,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(color: c.borderSubtle),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(color: adapter.brandColor, width: 1.5),
+                              ),
                             ),
                           ),
                         ),
@@ -156,10 +240,27 @@ class _GulayInventoryViewState extends State<GulayInventoryView> {
                         Expanded(
                           child: TextField(
                             controller: portionCtrl,
-                            style: const TextStyle(color: Colors.white),
-                            decoration: const InputDecoration(
+                            style: TextStyle(
+                              color: c.text,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            decoration: InputDecoration(
                               labelText: 'Pang-ulam / Recipe Hint',
+                              labelStyle: TextStyle(color: c.textSecondary, fontSize: 13),
                               hintText: 'e.g. Pinakbet, Sinigang',
+                              hintStyle: TextStyle(color: c.textTertiary, fontSize: 13),
+                              filled: true,
+                              fillColor: c.surfaceMuted,
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(color: c.borderSubtle),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide(color: adapter.brandColor, width: 1.5),
+                              ),
                             ),
                           ),
                         ),
@@ -171,9 +272,11 @@ class _GulayInventoryViewState extends State<GulayInventoryView> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: adapter.brandColor,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                         ),
                         onPressed: () {
@@ -203,6 +306,8 @@ class _GulayInventoryViewState extends State<GulayInventoryView> {
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            letterSpacing: 0.5,
                           ),
                         ),
                       ),
@@ -257,9 +362,13 @@ class _GulayInventoryViewState extends State<GulayInventoryView> {
           right: 16,
           child: FloatingActionButton.extended(
             backgroundColor: adapter.brandColor,
+            foregroundColor: Colors.white,
+            elevation: 3,
             icon: const Icon(Icons.add, color: Colors.white),
-            label: const Text('DAGDAG GULAY',
-                style: TextStyle(color: Colors.white)),
+            label: const Text(
+              'DAGDAG GULAY',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
             onPressed: _showAddDialog,
           ),
         ),

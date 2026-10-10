@@ -319,7 +319,7 @@ class _ListahanContentState extends ConsumerState<_ListahanContent> {
     String? selectedQrKey = qrEntries.isNotEmpty ? qrEntries.first['key'] : null;
     String? cashError;
 
-    if (!context.mounted) return;
+    if (!mounted) return;
 
     await showDialog<void>(
       context: context,
@@ -606,7 +606,7 @@ class _ListahanContentState extends ConsumerState<_ListahanContent> {
       onRefresh: () => ref.read(listahanProvider.notifier).refresh(),
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(14, 14, 14, 90),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

@@ -32,7 +32,7 @@ class _BuyerInboxScreenState extends ConsumerState<BuyerInboxScreen>
   @override
   Widget build(BuildContext context) {
     final AppColors c = appColors(context);
-    const Color brandGreen = Color(0xFF1E6E5A);
+    const Color brandGreen = Color(0xFFD62828);
 
     return Scaffold(
       backgroundColor: c.background,
@@ -68,7 +68,7 @@ class _BuyerInboxScreenState extends ConsumerState<BuyerInboxScreen>
 
   Widget _buildMessagesTab(BuildContext context) {
     final AppColors c = appColors(context);
-    const Color brandGreen = Color(0xFF1E6E5A);
+    const Color brandGreen = Color(0xFFD62828);
 
     final List<Map<String, dynamic>> threads = <Map<String, dynamic>>[
       <String, dynamic>{
@@ -77,7 +77,7 @@ class _BuyerInboxScreenState extends ConsumerState<BuyerInboxScreen>
         'msg': 'Handa na po ang inyong order ng Lucky Me at mantika! Pwede nang kunin.',
         'time': '5m ago',
         'unread': true,
-        'avatar': '🏪',
+        'icon': Icons.storefront,
       },
       <String, dynamic>{
         'name': 'Lipa Rice Mill & Grains',
@@ -85,7 +85,7 @@ class _BuyerInboxScreenState extends ConsumerState<BuyerInboxScreen>
         'msg': 'May bagong dating na Sinandomeng 50kg sako.',
         'time': '2h ago',
         'unread': false,
-        'avatar': '🌾',
+        'icon': Icons.grain,
       },
       <String, dynamic>{
         'name': 'Nanay Soling Carinderia',
@@ -93,7 +93,7 @@ class _BuyerInboxScreenState extends ConsumerState<BuyerInboxScreen>
         'msg': 'Available na po ang Pork Adobo at Sinigang for lunch!',
         'time': 'Yesterday',
         'unread': false,
-        'avatar': '🍲',
+        'icon': Icons.restaurant,
       },
     ];
 
@@ -139,9 +139,10 @@ class _BuyerInboxScreenState extends ConsumerState<BuyerInboxScreen>
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
-                  child: Text(
-                    th['avatar'] as String,
-                    style: const TextStyle(fontSize: 22),
+                  child: Icon(
+                    th['icon'] as IconData,
+                    color: brandGreen,
+                    size: 22,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -214,8 +215,8 @@ class _BuyerInboxScreenState extends ConsumerState<BuyerInboxScreen>
     final AppColors c = appColors(context);
     final BuyerState buyer = ref.watch(buyerProvider);
     final BuyerOrder? recent = buyer.stagedOrder;
-    const Color brandGreen = Color(0xFF1E6E5A);
-    const Color brandAmber = Color(0xFFC8861A);
+    const Color brandGreen = Color(0xFFD62828);
+    const Color brandAmber = Color(0xFFFFC93C);
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

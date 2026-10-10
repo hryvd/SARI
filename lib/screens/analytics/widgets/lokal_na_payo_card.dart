@@ -20,7 +20,7 @@ class LokalNaPayoCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: c.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: const Color(0xFFFFB300).withValues(alpha: 0.6),
           width: 1.2,

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const Color _brandSeed = Color(0xFF1E6E5A);
-const Color brandAmber = Color(0xFFC8861A);
+const Color brandRed = Color(0xFFD62828);
+const Color brandAmber = Color(0xFFFFC93C);
 
 class AppColors {
   const AppColors({
@@ -41,51 +41,56 @@ class AppColors {
 
   factory AppColors.fromScheme(ColorScheme scheme) {
     final bool dark = scheme.brightness == Brightness.dark;
-    final Color background = Color.lerp(
-      scheme.surface,
-      scheme.primary,
-      dark ? 0.06 : 0.02,
-    )!;
-    final Color surface = Color.lerp(
-      scheme.surface,
-      scheme.primary,
-      dark ? 0.12 : 0.04,
-    )!;
-    final Color surfaceMuted = Color.lerp(
-      scheme.surface,
-      scheme.primary,
-      dark ? 0.18 : 0.08,
-    )!;
+    final Color background =
+        dark ? const Color(0xFF151414) : const Color(0xFFF7F6F4);
+    final Color surface = dark ? const Color(0xFF201E1D) : Colors.white;
+    final Color surfaceMuted =
+        dark ? const Color(0xFF2B2827) : const Color(0xFFF0EEEC);
 
     return AppColors(
       background: background,
-      backgroundSecondary: scheme.surface,
+      backgroundSecondary: surface,
       surface: surface,
       surfaceMuted: surfaceMuted,
-      text: scheme.onSurface,
-      textSecondary: scheme.onSurfaceVariant,
-      textTertiary:
-          scheme.onSurfaceVariant.withValues(alpha: dark ? 0.72 : 0.64),
-      primary: scheme.primary,
-      primaryDark:
-          Color.lerp(scheme.primary, Colors.black, dark ? 0.14 : 0.22)!,
-      accent: scheme.secondary,
+      text: dark ? const Color(0xFFF7F4F2) : const Color(0xFF211E1D),
+      textSecondary: dark ? const Color(0xFFC5BFBC) : const Color(0xFF625B58),
+      textTertiary: dark ? const Color(0xFF9C9490) : const Color(0xFF817975),
+      primary: brandRed,
+      primaryDark: brandRed,
+      accent: brandRed,
       error: scheme.error,
       warning: const Color(0xFFF59E0B),
-      info: scheme.tertiary,
-      border: scheme.outline.withValues(alpha: dark ? 0.55 : 0.40),
-      borderSubtle: scheme.outline.withValues(alpha: dark ? 0.34 : 0.22),
+      info: const Color(0xFF2476A8),
+      border: dark ? const Color(0xFF514A47) : const Color(0xFFD7D2CE),
+      borderSubtle: dark ? const Color(0xFF393432) : const Color(0xFFE8E4E1),
     );
   }
 }
 
-ThemeData buildTheme(Brightness brightness, {ColorScheme? dynamicScheme}) {
-  final ColorScheme scheme = dynamicScheme ??
-      ColorScheme.fromSeed(
-        seedColor: _brandSeed,
-        brightness: brightness,
-        dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
-      );
+ThemeData buildTheme(Brightness brightness) {
+  final ColorScheme generatedScheme = ColorScheme.fromSeed(
+    seedColor: brandRed,
+    brightness: brightness,
+    dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
+  );
+  final ColorScheme scheme = generatedScheme.copyWith(
+    primary: brandRed,
+    onPrimary: Colors.white,
+    primaryContainer: brightness == Brightness.dark
+        ? const Color(0xFF641C1A)
+        : const Color(0xFFF9DEDA),
+    onPrimaryContainer: brightness == Brightness.dark
+        ? const Color(0xFFFFDAD5)
+        : const Color(0xFF410002),
+    secondary: brandRed,
+    onSecondary: Colors.white,
+    secondaryContainer: brightness == Brightness.dark
+        ? const Color(0xFF641C1A)
+        : const Color(0xFFF9DEDA),
+    onSecondaryContainer: brightness == Brightness.dark
+        ? const Color(0xFFFFDAD5)
+        : const Color(0xFF410002),
+  );
   final AppColors c = AppColors.fromScheme(scheme);
 
   final ThemeData base = ThemeData(
@@ -94,7 +99,7 @@ ThemeData buildTheme(Brightness brightness, {ColorScheme? dynamicScheme}) {
     scaffoldBackgroundColor: c.background,
     colorScheme: scheme,
     appBarTheme: AppBarTheme(
-      backgroundColor: c.background.withValues(alpha: 0.92),
+      backgroundColor: c.background,
       foregroundColor: c.text,
       toolbarHeight: 80,
       elevation: 0,
@@ -106,23 +111,27 @@ ThemeData buildTheme(Brightness brightness, {ColorScheme? dynamicScheme}) {
     ),
     cardTheme: CardThemeData(
       color: c.surface,
-      elevation: 1,
+      elevation: 0,
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(8),
         side: BorderSide(color: c.borderSubtle),
       ),
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: c.surface,
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: c.borderSubtle),
+      ),
     ),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: c.surface,
       modalBackgroundColor: c.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      shape: RoundedRectangleBorder(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        side: BorderSide(color: c.borderSubtle),
       ),
     ),
     inputDecorationTheme: InputDecorationTheme(
@@ -130,15 +139,15 @@ ThemeData buildTheme(Brightness brightness, {ColorScheme? dynamicScheme}) {
       fillColor: c.surfaceMuted,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: c.border),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: c.border),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(12),
         borderSide: BorderSide(color: c.primary, width: 1.5),
       ),
       hintStyle: TextStyle(color: c.textTertiary),
@@ -147,7 +156,7 @@ ThemeData buildTheme(Brightness brightness, {ColorScheme? dynamicScheme}) {
       style: FilledButton.styleFrom(
         backgroundColor: c.primary,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       ),
     ),
@@ -156,29 +165,29 @@ ThemeData buildTheme(Brightness brightness, {ColorScheme? dynamicScheme}) {
         backgroundColor: c.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
         foregroundColor: c.primary,
-        side: BorderSide(color: c.border),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        side: BorderSide(color: c.primary.withValues(alpha: 0.45)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: c.primary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(
         foregroundColor: c.primary,
         backgroundColor: c.surfaceMuted,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),
     chipTheme: ChipThemeData(

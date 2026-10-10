@@ -41,7 +41,7 @@ const INITIAL: Item[] = [
   { id: 22, name: 'Bigas Dinorado (1kg)', price: 62, cost: 55, cat: 'Rice', stock: 25, perDay: 4, pack: 25, unit: 'sako', supplier: 'Lipa Rice Mill' },
   { id: 23, name: 'Colgate 25g', price: 22, cost: 18, cat: 'Home', stock: 14, perDay: 2, pack: 12, unit: 'box', supplier: 'Metro Supply' },
 ]
-const CATS = ['All', 'Noodles', 'Drinks', 'Snacks', 'Canned', 'Cooking', 'Fresh', 'Rice', 'Home']
+const CATS = ['Lahat', 'Noodles', 'Drinks', 'Snacks', 'Fresh', 'Rice', 'Home', 'Cooking', 'Canned']
 const LOW = 10
 const peso = (n: number) => '₱' + Math.round(n).toLocaleString('en-PH')
 
@@ -111,6 +111,9 @@ function Agent(p: { role: Role; items: Item[]; storeType: StoreType; modelReady:
     }
     if (l.includes('utang') || l.includes('ilista')) return { from: 'sari', risk: 'Draft', text: 'Ito ang draft ng ledger entry. Hindi pa naitatala.', draft: { kind: 'utang', title: 'Utang: Aling Nena', lines: [], total: 120, note: 'Ledger entry' }, state: 'open' }
     if (l.includes('kamatis') || l.includes('magkano')) { const kg = Number(/([\d.]+)\s*kilo/.exec(l)?.[1] ?? 1); return { from: 'sari', risk: 'Read', text: `${kg} kilo ng kamatis = ${peso(kg * 80)} (₱80/kilo). Ang halaga ay kinuwenta ng app, hindi ng AI.` } }
+    if (l.includes('hula') || l.includes('forecast') || l.includes('predict') || l.includes('peak')) {
+      return { from: 'sari', risk: 'Read', text: '🔮 Gemma 4 E2B & GBR Forecast: Inaasahang benta bukas ay ₱5,240.00 (🔥 PEAK DAY +38%). Payo: Mag-stock nang maaga sa Kopiko at Pancit Canton bago mag-alas 8 ng umaga.' }
+    }
     if (l.includes('naibenta') || l.includes('sales') || l.includes('benta')) return { from: 'sari', risk: 'Read', text: 'Kahapon: ₱4,310 mula sa 58 benta. Top seller ang Kopiko 3-in-1 (212 pcs).' }
     if (l.includes('adobo') || l.includes('lutuin')) return storeType === 'Carenderia'
       ? { from: 'sari', risk: 'Draft', text: 'Prep suggestion para bukas, mula sa benta tuwing Huwebes at nasayang na ulam.', draft: { kind: 'prep', title: 'Prep list bukas', lines: [], total: 0, note: 'Adobo: 32 porsyon · Sinigang: 24 porsyon' } }
@@ -194,17 +197,46 @@ function Agent(p: { role: Role; items: Item[]; storeType: StoreType; modelReady:
 
 /* ---------- LANDING ---------- */
 function Landing({ onStart }: { onStart: (r: Role) => void }) {
-  const feats: [LucideIcon, string][] = [[WifiOff, 'Gumagana kahit walang internet'], [Sparkles, 'AI na tutulong mag-restock at magbenta'], [QrCode, 'QR order: scan lang sa tindahan']]
+  const feats: [LucideIcon, string][] = [
+    [WifiOff, 'Gumagana kahit walang internet'],
+    [Sparkles, 'Matalinong tulong, kayo pa rin ang masusunod'],
+    [QrCode, 'Madaling order para sa tindahan at mamimili'],
+  ]
   return (
-    <div className="h-full overflow-y-auto bg-gradient-to-b from-brand to-brand-deep text-white flex flex-col items-center px-6 py-10 landing">
-      <div className="bob drop-shadow-2xl"><Logo size={132} /></div>
-      <h1 className="font-display text-6xl font-extrabold mt-3 leading-none">SARI</h1>
-      <p className="text-center opacity-90 mt-2">Ang tindahan ninyo, may kasamang AI.<br />Para sa mamimili at tindera, bata man o matanda.</p>
-      <ul className="mt-6 space-y-2 w-full">{feats.map(([Ic, t], i) => <li key={t} style={{ animationDelay: `${0.2 + i * 0.12}s` }} className="rise flex items-center gap-3 bg-white/15 rounded-2xl px-4 min-h-14 font-bold"><Ic className="size-6 text-amber-200" />{t}</li>)}</ul>
-      <div className="mt-auto pt-8 w-full space-y-3">
-        <button onClick={() => onStart('buyer')} className="w-full min-h-16 rounded-3xl bg-white text-brand font-display text-xl font-bold flex items-center justify-center gap-2"><ShoppingCart className="size-6" />Mamimili (Buyer)</button>
-        <button onClick={() => onStart('seller')} className="w-full min-h-16 rounded-3xl bg-amber-400 text-brand-deep font-display text-xl font-bold flex items-center justify-center gap-2" style={{ background: '#ffc83d' }}><Store className="size-6" />May-ari ng Tindahan (Seller)</button>
-        <p className="text-center text-xs opacity-70">SARI v1.0 · Batangas State University</p>
+    <div className="h-full overflow-y-auto bg-gradient-to-b from-[#8B1515] to-[#A31D1D] text-white flex flex-col items-center px-6 py-10 landing">
+      <div className="w-22 h-22 rounded-3xl bg-white shadow-2xl flex items-center justify-center bob">
+        <Store className="size-13 text-[#A31D1D]" />
+      </div>
+      <h1 className="font-display text-5xl font-extrabold mt-3.5 tracking-wider text-white">SARI</h1>
+      <p className="text-center text-[#FDE8E8] text-sm mt-1">Ang tindahan ninyo, may kasamang katuwang.</p>
+      <ul className="mt-6 space-y-2.5 w-full">
+        {feats.map(([Ic, t], i) => (
+          <li
+            key={t}
+            style={{ animationDelay: `${0.15 + i * 0.1}s` }}
+            className="rise flex items-center gap-3 bg-[#6E1111]/50 border border-white/15 rounded-2xl px-4 min-h-13 text-sm font-semibold"
+          >
+            <Ic className="size-5 text-[#FFD54F] shrink-0" />
+            <span>{t}</span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-auto pt-6 w-full space-y-3">
+        <button
+          onClick={() => onStart('buyer')}
+          className="w-full min-h-14 rounded-full bg-white text-[#A31D1D] font-display text-base font-extrabold flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all"
+        >
+          <ShoppingBag className="size-5" />
+          Mamimili ako
+        </button>
+        <button
+          onClick={() => onStart('seller')}
+          className="w-full min-h-14 rounded-full bg-[#E5A93C] text-[#4A1800] font-display text-base font-extrabold flex items-center justify-center gap-2 shadow-lg active:scale-[0.98] transition-all"
+        >
+          <Store className="size-5" />
+          May-ari ako ng tindahan
+        </button>
+        <p className="text-center text-xs text-[#FDE8E8]/70 pt-2">SARI · Lokal muna. Para sa lahat.</p>
       </div>
     </div>
   )
@@ -330,49 +362,204 @@ function Scanner({ items, onAdd, onClose }: { items: Item[]; onAdd: (i: Item) =>
 
 /* ---------- POS ---------- */
 function POS({ items, sell, order, claim, openInv }: { items: Item[]; sell: (c: Record<number, number>) => void; order: BuyerOrder | null; claim: () => void; openInv: () => void }) {
-  const [cat, setCat] = useState('All')
+  const [cat, setCat] = useState('Lahat')
   const [q, setQ] = useState('')
   const [cart, setCart] = useState<Record<number, number>>({})
-  const [pay, setPay] = useState('Cash')
+  const [pay, setPay] = useState('GCash')
   const [paid, setPaid] = useState('')
+  const [hideNotice, setHideNotice] = useState(false)
   const count = Object.values(cart).reduce((a, b) => a + b, 0)
   const total = items.reduce((s, i) => s + i.price * (cart[i.id] || 0), 0)
-  const list = items.filter((i) => (cat === 'All' || i.cat === cat) && i.name.toLowerCase().includes(q.toLowerCase()))
+  const list = items.filter((i) => (cat === 'Lahat' || i.cat === cat) && i.name.toLowerCase().includes(q.toLowerCase()))
   const add = (i: Item) => { if ((cart[i.id] || 0) < i.stock) { setPaid(''); setCart((c) => ({ ...c, [i.id]: (c[i.id] || 0) + 1 })) } }
   const press = useRef<number>(0)
   const [scan, setScan] = useState(false)
   const [qr, setQr] = useState(false)
   return (
-    <div className="relative flex flex-col h-full">
+    <div className="relative flex flex-col h-full bg-[#FAF7F2]">
       {qr && <OrderScanner order={order} onClose={() => setQr(false)} onRead={(o) => { setCart(Object.fromEntries(o.lines.map((l) => [l.id, l.qty]))); claim(); setPaid(`Order ${o.id} ni ${o.buyer} nai-load`); setQr(false) }} />}
       {scan && <Scanner items={items} onAdd={(i) => { add(i); setScan(false) }} onClose={() => setScan(false)} />}
-      <div className="p-3 flex gap-2">
-        <label className="flex-1 relative"><Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 opacity-60" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Hanapin ang item" className="w-full min-h-12 rounded-full pl-12 pr-4 bg-card border-2 border-brand/25 focus:border-brand outline-none" /></label>
-        <button aria-label="AI scan product" onClick={() => setScan(true)} className="min-h-12 px-4 rounded-full bg-amber text-white font-bold flex items-center gap-1"><ScanLine className="size-5" />AI Scan</button>
+      
+      {/* Top Controls Area */}
+      <div className="p-3 bg-white space-y-2 border-b border-black/5 shadow-sm">
+        {/* Search input with trailing scan button */}
+        <div className="relative flex items-center">
+          <Search className="absolute left-3.5 size-5 text-black/40 pointer-events-none" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Hanapin ang produkto"
+            className="w-full min-h-11 rounded-full pl-11 pr-12 bg-white border border-[#DDD5CE] text-sm text-black focus:border-[#A31D1D] outline-none shadow-xs"
+          />
+          <button
+            onClick={() => setScan(true)}
+            aria-label="Scan barcode"
+            className="absolute right-1.5 size-8 rounded-full bg-[#FDE8E8] text-[#A31D1D] grid place-items-center active:scale-95"
+          >
+            <QrCode className="size-4" />
+          </button>
+        </div>
+
+        {/* Action pills: Imbentaryo, SCAN, AI Scan */}
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={openInv}
+            className="min-h-9 rounded-full bg-white border border-[#DDD5CE] text-[#5A4A42] font-bold text-xs flex items-center justify-center gap-1.5 hover:bg-black/5"
+          >
+            <Boxes className="size-3.5 text-[#5A4A42]" />
+            Imbentaryo
+          </button>
+          <button
+            onClick={() => setQr(true)}
+            className="min-h-9 rounded-full bg-[#A31D1D] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs"
+          >
+            <QrCode className="size-3.5" />
+            SCAN
+          </button>
+          <button
+            onClick={() => setScan(true)}
+            className="min-h-9 rounded-full bg-blue-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs"
+          >
+            <ScanLine className="size-3.5" />
+            AI SCAN
+          </button>
+        </div>
+
+        {/* Horizontal Category Chips (Image 1) */}
+        <div className="flex gap-2 overflow-x-auto pt-0.5 pb-0.5 no-scrollbar">
+          {CATS.map((c) => {
+            const isSel = cat === c
+            return (
+              <button
+                key={c}
+                onClick={() => setCat(c)}
+                className={`min-h-8 px-3.5 rounded-full text-xs font-bold shrink-0 transition-all flex items-center gap-1 border ${
+                  isSel
+                    ? 'bg-[#FDE8E8] text-[#8B1515] border-[#E5B8B8] font-extrabold'
+                    : 'bg-white text-black/80 border-[#DDD5CE]'
+                }`}
+              >
+                {isSel && <Check className="size-3 stroke-[3]" />}
+                {c}
+              </button>
+            )
+          })}
+        </div>
       </div>
-      <div className="px-3 pb-2 grid grid-cols-2 gap-2">
-        <button onClick={() => setQr(true)} className="min-h-12 rounded-2xl bg-brand-soft text-brand font-bold flex items-center justify-center gap-2 relative"><QrCode className="size-5" />Scan order QR{order?.status === 'Naipadala' && <span className="absolute -top-1 -right-1 size-4 rounded-full bg-amber" />}</button>
-        <button onClick={openInv} className="min-h-12 rounded-2xl bg-brand-soft text-brand font-bold flex items-center justify-center gap-2"><Boxes className="size-5" />Inventory</button>
+
+      {/* Main Content: Responsive Product Blocks Grid */}
+      <div className="flex-1 overflow-y-auto p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 content-start">
+        {list.map((i) => {
+          const Ic = CAT_ICON[i.cat] ?? Package
+          const inCart = cart[i.id]
+          const isLow = i.stock < LOW
+          return (
+            <button
+              key={i.id}
+              onClick={() => add(i)}
+              onPointerDown={() => (press.current = Date.now())}
+              className={`relative bg-white rounded-2xl p-3 border shadow-xs text-left flex flex-col justify-between min-h-32 transition-all active:scale-[0.98] ${
+                inCart ? 'border-[#E5A93C] ring-1 ring-[#E5A93C]' : 'border-[#ECE7E2] hover:border-[#A31D1D]/30'
+              }`}
+            >
+              {/* Top row: Category icon + In-cart amber badge */}
+              <div className="flex items-center justify-between w-full">
+                <Ic className="size-5 text-[#A31D1D]" />
+                {inCart ? (
+                  <span className="size-5 rounded-full bg-[#E5A93C] text-white text-[0.7rem] font-black grid place-items-center pop">
+                    {inCart}
+                  </span>
+                ) : (
+                  <span className="size-5" />
+                )}
+              </div>
+
+              {/* Name */}
+              <div className="text-xs font-bold text-black/85 leading-tight line-clamp-2 mt-2">
+                {i.name}
+              </div>
+
+              {/* Bottom: Price and Stock */}
+              <div className="mt-1.5">
+                <div className="font-display font-black text-base text-[#A31D1D] leading-none">
+                  {peso(i.price)}
+                </div>
+                {isLow ? (
+                  <div className="text-[0.65rem] font-bold text-[#A31D1D] mt-0.5">
+                    Natitira {i.stock}
+                  </div>
+                ) : (
+                  <div className="text-[0.65rem] text-black/50 mt-0.5">
+                    Stock {i.stock}
+                  </div>
+                )}
+              </div>
+            </button>
+          )
+        })}
       </div>
-      <div className="px-3 pb-2 flex gap-2 overflow-x-auto">{CATS.map((c) => <Chip key={c} active={cat === c} onClick={() => setCat(c)}>{c}</Chip>)}</div>
-      <div className="flex-1 overflow-y-auto px-3 grid grid-cols-3 gap-2 content-start">
-        {list.map((i) => { const Ic = CAT_ICON[i.cat] ?? Package; return (
-          <button key={i.id} onClick={() => add(i)} onPointerDown={() => (press.current = Date.now())} className="relative bg-card rounded-2xl p-2 border border-black/5 text-center min-h-28 hover:bg-brand-soft">
-            {cart[i.id] && <span className="pop absolute -top-1 -right-1 size-7 rounded-full bg-amber text-white text-sm font-extrabold grid place-items-center">{cart[i.id]}</span>}
-            <Ic className="size-8 mx-auto text-brand" />
-            <div className="text-xs font-bold leading-tight mt-1 line-clamp-2">{i.name}</div>
-            <div className="font-display font-extrabold text-brand">{peso(i.price)}</div>
-            {i.stock < LOW && <div className="text-[0.65rem] font-bold text-amber">Kulang · {i.stock}</div>}
-          </button>) })}
-      </div>
-      <div className="p-3 bg-card border-t border-black/5 rounded-t-3xl">
-        <p className="text-[0.7rem] opacity-60 mb-1 flex items-center gap-1"><WifiOff className="size-3" />Offline OK · naka-save ang bawat benta sa phone</p>
-        {paid && <p className="pop text-center font-bold text-brand mb-2 flex items-center justify-center gap-1"><Check className="size-5" />{paid}</p>}
-        <div className="flex gap-2 mb-2">{['Cash', 'GCash', 'Utang'].map((x) => <Chip key={x} active={pay === x} onClick={() => setPay(x)}>{x}</Chip>)}</div>
-        <div className="flex items-center gap-3">
-          <div className="flex-1"><p className="text-xs opacity-70">{count} item</p><p className="font-display text-[1.75rem] font-extrabold leading-none">{peso(total)}</p></div>
-          <button disabled={!count} onClick={() => { sell(cart); setPaid(`Bayad na (${pay}) · ${peso(total)}`); setCart({}) }} className="min-h-14 px-8 rounded-2xl bg-brand text-white font-display font-bold text-xl disabled:opacity-40">Charge</button>
+
+      {/* Sticky Bottom Checkout Dock (Image 1) */}
+      <div className="p-3.5 bg-white border-t border-black/10 rounded-t-3xl shadow-2xl space-y-2">
+        {/* Offline Notice */}
+        {!hideNotice && (
+          <div className="flex items-center gap-1.5 text-[0.7rem] text-black/80">
+            <span className="text-[#A31D1D] text-xs font-black">ⓘ</span>
+            <span className="flex-1">Sa device na ito naka-save ang mga benta</span>
+            <button
+              onClick={() => setHideNotice(true)}
+              className="text-black/50 hover:text-black font-semibold text-xs"
+            >
+              Alisin
+            </button>
+          </div>
+        )}
+
+        {paid && (
+          <p className="pop text-center font-bold text-xs text-[#A31D1D] flex items-center justify-center gap-1">
+            <Check className="size-4" />
+            {paid}
+          </p>
+        )}
+
+        {/* Payment Methods Segmented Pills (Cash, GCash, Utang) */}
+        <div className="grid grid-cols-3 gap-2">
+          {['Cash', 'GCash', 'Utang'].map((x) => {
+            const isSel = pay === x
+            return (
+              <button
+                key={x}
+                onClick={() => setPay(x)}
+                className={`min-h-9 rounded-full text-xs font-bold border transition-all flex items-center justify-center gap-1 ${
+                  isSel
+                    ? 'bg-[#FDE8E8] text-[#8B1515] border-[#E5B8B8] font-extrabold'
+                    : 'bg-white text-black/80 border-[#DDD5CE]'
+                }`}
+              >
+                {isSel && <Check className="size-3 stroke-[3]" />}
+                {x}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Summary row */}
+        <div className="flex items-center justify-between pt-1">
+          <div>
+            <p className="text-[0.7rem] text-black/55 font-semibold leading-none">{count} item</p>
+            <p className="font-display text-2xl font-black text-black leading-tight mt-0.5">{peso(total)}</p>
+          </div>
+          <button
+            disabled={!count}
+            onClick={() => {
+              sell(cart)
+              setPaid(`Bayad na (${pay}) · ${peso(total)}`)
+              setCart({})
+            }}
+            className="min-h-12 px-8 rounded-full bg-[#A31D1D] text-white font-display font-black text-base disabled:opacity-40 shadow-md active:scale-95 transition-all"
+          >
+            Bayaran
+          </button>
         </div>
       </div>
     </div>

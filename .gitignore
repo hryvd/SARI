@@ -38,3 +38,6 @@ android/captures/
 android/.cxx/
 android/.kotlin/
 
+# Local AI weights (>10GB binary weights)
+gemma-4-transformers-gemma-4-e2b-v1/
+
